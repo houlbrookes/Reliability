@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace FaultTreeXl
 {
-    internal class PT100Command : ICommand
+    internal class Life5YearsCommand : ICommand
     {
         public event EventHandler CanExecuteChanged
         {
@@ -16,18 +16,17 @@ namespace FaultTreeXl
 
         public void Execute(object parameter)
         {
-            const decimal PROOF_TEST_EFFECTIVENESS = 1;
-
+            const decimal LIFETIME = 8760 * 5;
             if (parameter is FaultTreeModel faultTreeModel)
             {
-                faultTreeModel.ProofTestEffectiveness = PROOF_TEST_EFFECTIVENESS;
+                faultTreeModel.MissionTime = LIFETIME;
                 foreach (Node node in faultTreeModel.FaultTree.OfType<Node>())
                 {
-                    node.ProofTestEffectiveness = PROOF_TEST_EFFECTIVENESS;
+                    node.LifeTime = LIFETIME;
                 }
                 foreach (var node in faultTreeModel.FaultTree) node.LifeTime = faultTreeModel.MissionTime;
                 faultTreeModel.ReDrawRootNode();
-                faultTreeModel.Status = $"Global Proof Test Effectiveness Updated to: {PROOF_TEST_EFFECTIVENESS:P0}";
+                faultTreeModel.Status = $"Global Mission Time Updated to: {LIFETIME:N0}";
             }
         }
     }

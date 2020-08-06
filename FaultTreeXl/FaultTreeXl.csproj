@@ -96,10 +96,15 @@
     <Compile Include="Commands\DiagnosedFaultAddCommand.cs" />
     <Compile Include="Commands\DummyCommand.cs" />
     <Compile Include="Commands\GetFailRateCommand.cs" />
+    <Compile Include="Commands\Life10YearsCommand.cs" />
+    <Compile Include="Commands\Life15YearsCommand.cs" />
+    <Compile Include="Commands\Life20YearsCommand.cs" />
+    <Compile Include="Commands\Life5YearsCommand.cs" />
     <Compile Include="Commands\MoveDownCommand.cs" />
     <Compile Include="Commands\MoveRightCommand.cs" />
     <Compile Include="Commands\MoveUpCommand.cs" />
     <Compile Include="Commands\MultiBindingConverter.cs" />
+    <Compile Include="Commands\PT90Command.cs" />
     <Compile Include="Commands\RecalcCommand.cs" />
     <Compile Include="Commands\SelectCommand.cs" />
     <Compile Include="Commands\ShowCutSetsCommand.cs" />
@@ -122,6 +127,7 @@
     <Compile Include="Models\DiagnosedFaultNode.cs" />
     <Compile Include="Models\StandardComponents.cs" />
     <Compile Include="Models\Voted2oo3.cs" />
+    <Compile Include="Commands\GenericCommand.cs" />
     <Compile Include="UserInterface\StandardFailures.xaml.cs">
       <DependentUpon>StandardFailures.xaml</DependentUpon>
     </Compile>

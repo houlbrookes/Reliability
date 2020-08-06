@@ -41,7 +41,11 @@ namespace FaultTreeXl
 
     public class UpdateWithStandardFailureCommand : ICommand
     {
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler CanExecuteChanged
+        {
+            add { }
+            remove { }
+        }
 
         public bool CanExecute(object parameter) => true;
 
@@ -131,35 +135,5 @@ namespace FaultTreeXl
             new StandardFailure{Type="Diode", Name="General", Rate=1.00E-09M },
             new StandardFailure{Type="LED", Name="General", Rate=5.00E-09M },
         };
-    }
-
-    public class GenericCommand<T> : ICommand
-    {
-        public Func<T, bool> CanExecuteProxy;
-        public Action<T> ExecuteProxy;
-
-        public event EventHandler CanExecuteChanged;
-
-        public bool CanExecute(object parameter)
-        {
-            bool? result = true;
-            if (parameter is T typedParam)
-            {
-                result = CanExecuteProxy?.Invoke(typedParam);
-            }
-
-            return result == true;
-        }
-
-        public void Execute(object parameter)
-        {
-            if (parameter is T typedParam)
-            {
-                if (CanExecuteProxy != null)
-                {
-                    ExecuteProxy?.Invoke(typedParam);
-                }
-            }
-        }
     }
 }

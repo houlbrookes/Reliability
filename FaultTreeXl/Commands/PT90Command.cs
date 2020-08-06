@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace FaultTreeXl
 {
-    internal class PT100Command : ICommand
+    internal class PT90Command : ICommand
     {
         public event EventHandler CanExecuteChanged
         {
@@ -16,8 +16,7 @@ namespace FaultTreeXl
 
         public void Execute(object parameter)
         {
-            const decimal PROOF_TEST_EFFECTIVENESS = 1;
-
+            const decimal PROOF_TEST_EFFECTIVENESS = (decimal)0.9;
             if (parameter is FaultTreeModel faultTreeModel)
             {
                 faultTreeModel.ProofTestEffectiveness = PROOF_TEST_EFFECTIVENESS;

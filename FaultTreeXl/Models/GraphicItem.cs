@@ -9,6 +9,11 @@ using System.Xml.Serialization;
 
 namespace FaultTreeXl
 {
+    /// <summary>
+    /// This is the base class for the Fault Tree objects
+    /// It is split into two definitions
+    /// 1. 
+    /// </summary>
     [XmlInclude(typeof(DiagnosedFaultNode))]
     [XmlInclude(typeof(Voted2oo3))]
     [XmlInclude(typeof(OR))]
@@ -25,13 +30,23 @@ namespace FaultTreeXl
         {
 
         }
-
+        /// <summary>
+        /// Constructor allowing 
+        /// </summary>
+        /// <param name="x2"></param>
+        /// <param name="x3"></param>
         public GraphicItem(double x2, double x3)
         {
             X2 = x2;
             X3 = x3;
         }
 
+        /// <summary>
+        /// Any two Nodes with the same name are considered to be equal
+        /// Watch out for items with the same name and different failure/PTI rates
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public override bool Equals(object obj)
         {
             var result = base.Equals(obj);
@@ -58,10 +73,18 @@ namespace FaultTreeXl
         [XmlIgnore]
         virtual public List<CutSet> CutSets { get; } = new List<CutSet>();
 
+        /// <summary>
+        /// Useful for debugging
+        /// Returns a string representation of the cut sets 
+        /// (Work is done in CutSet extension class)
+        /// </summary>
         [XmlIgnore]
         public string CutSetsAsString { get => CutSets.AsString();  }
 
         private decimal lambda = 0;
+        /// <summary>
+        /// Failure rate (often referred to as Lambda
+        /// </summary>
         [XmlAttribute]
         virtual public decimal Lambda
         {
@@ -77,6 +100,9 @@ namespace FaultTreeXl
         }
 
         private decimal _pTI = 8760;
+        /// <summary>
+        /// Proof Test Interval in Hours
+        /// </summary>
         [XmlAttribute]
         virtual public decimal PTI
         {
@@ -89,6 +115,10 @@ namespace FaultTreeXl
             }
         }
 
+        /// <summary>
+        /// Mean Downtime
+        /// Uses the simple forumla of PFD/Failure Rate
+        /// </summary>
         [XmlAttribute]
         virtual public decimal MDT { get => Lambda>0 ? PFD / Lambda : 0; }
 
@@ -100,7 +130,14 @@ namespace FaultTreeXl
         [XmlElement(IsNullable = true)]
         public decimal? LifeTime { get => _lifeTime; set => Changed(ref _lifeTime, value); }
 
-
+        /// <summary>
+        /// Probability of Failure on Demand
+        /// Most of the word is done in the the CutSets Extension class
+        /// the formula used is simple: OR together the PFD from each Minimal Cut Set
+        /// i.e. Multiply them together and subtract from 1.
+        /// This is only possible because I'm using a Decimal floating point, 
+        /// the accuracy of Decimals is 128-bit floating point giving 28 to 29 decimal point accuracy
+        /// </summary>
         [XmlIgnore]
         public decimal PFD
         {
@@ -152,10 +189,6 @@ namespace FaultTreeXl
         /// </summary>
         [XmlIgnore]
         public Microsoft.Office.Interop.Visio.Shape BodyShape { get; set; }
-
-
-        //[XmlIgnore]
-        //public System.Windows.Controls.Control DisplayingControl { get; set; }
 
         virtual public double AssignXY(double x1, double y1)
         {

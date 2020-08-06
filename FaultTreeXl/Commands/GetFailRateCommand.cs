@@ -6,7 +6,11 @@ namespace FaultTreeXl
 {
     public class GetFailRateCommand : ICommand
     {
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler CanExecuteChanged
+        {
+            add { }
+            remove { }
+        }
 
         public bool CanExecute(object parameter)
         {

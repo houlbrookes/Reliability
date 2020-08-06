@@ -6,7 +6,11 @@ namespace FaultTreeXl
 {
     internal class Voted2oo3AddCommand : ICommand
     {
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler CanExecuteChanged
+        {
+            add { }
+            remove { }
+        }
 
         public bool CanExecute(object parameter)
         {
