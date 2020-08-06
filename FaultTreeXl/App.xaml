@@ -1,0 +1,47 @@
+﻿<Application x:Class="FaultTreeXl.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:FaultTreeXl"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <local:FaultTreeModel x:Key="GlobalFaultTreeModel" />
+        <local:OR x:Key="GlobalOR" />
+        <local:AND x:Key="GlobalAND" />
+        <local:Node x:Key="GlobalNode" />
+
+        <local:OREditCommand x:Key="OREditCommand"     />
+        <local:ORDeleteCommand x:Key="ORDeleteCommand"     />
+        <local:NodeAddCommand x:Key="NodeAddCommand"     />
+        <local:DiagnosedFaultAddCommand x:Key="DiagnosedFaultAddCommand"     />
+        <local:ORAddCommand x:Key="ORAddCommand"     />
+        <local:ANDAddCommand x:Key="ANDAddCommand"     />
+        <local:Voted2oo3AddCommand x:Key="Voted2oo3AddCommand"     />
+        <local:MoveRightCommand x:Key="MoveRightCommand"     />
+        <local:MoveUpCommand x:Key="MoveUpCommand"     />
+        <local:MoveDownCommand x:Key="MoveDownCommand"     />
+        <local:DrawAsVisioCommand x:Key="DrawAsVisioCommand"     />
+        <local:PT100Command x:Key="ProofTest100"     />
+        <local:PT90Command x:Key="ProofTest90"     />
+        <local:Life5YearsCommand x:Key="Life5Years"     />
+        <local:Life10YearsCommand x:Key="Life10Years"     />
+        <local:Life15YearsCommand x:Key="Life15Years"     />
+        <local:Life20YearsCommand x:Key="Life20Years"     />
+        <local:RecalcCommand x:Key="RecalcCommand"     />
+        <local:SelectCommand x:Key="SelectCommand"     />
+        <local:ToggleLifeCommand x:Key="ToggleShowLifeCommand"     />
+        <local:ChoosePartCommand x:Key="ChoosePartCommand"     />
+        <local:UpdateNodeFromStandardCommand x:Key="UpdateNodeFromStandardCommand"     />
+        <local:CalcCCFCommand x:Key="CalcCCFCommand"     />
+        <local:ApplyCCFCommand x:Key="ApplyCCFCommand" />
+        <local:ToggleForceIntegrationCommand x:Key="ToggleForceIntegrationCommand" />
+        <local:GetFailRateCommand x:Key="GetFailRateCommand" />
+        <local:ShowCutSetsCommand x:Key="ShowCutSetsCommand" />
+        <local:CCFCommand x:Key="CCFCommand" />
+
+        <local:DummyCommand x:Key="DummyCommand"     />
+
+        <local:MultiBindingConverter x:Key="MultiBindingConverter" />
+
+        <local:StandardComponents x:Key="GlobalParts" />
+    </Application.Resources>
+</Application>

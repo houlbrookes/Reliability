@@ -1,0 +1,49 @@
+﻿<Window x:Class="FaultTreeXl.StandardFailures"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FaultTreeXl"
+        mc:Ignorable="d" d:DataContext="{DynamicResource DataContext}"
+        Title="Standard Failure Rates" Height="400" Width="300" ShowInTaskbar="False" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Topmost="True" WindowStyle="ToolWindow">
+    <Window.Resources>
+        <local:StandardFailiuresController x:Key="DataContext" />
+    </Window.Resources>
+
+    <Grid >
+        <DockPanel>
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="File">
+                    <MenuItem Header="Save" Command="{Binding Save}" CommandParameter="{Binding FailureRates}" />
+                    <MenuItem Header="Load" Command="{Binding Load}" CommandParameter="{Binding FailureRates}" />
+                </MenuItem>
+            </Menu>
+            <ListView Name="Failures" Height="280" 
+                      DockPanel.Dock="Top"
+                     ItemsSource="{Binding Path=FailureRates}" 
+                     SelectedItem="{Binding Path=UpdateCommand.Selected}">
+                <!--<ListViewItem.InputBindings>
+
+                    <MouseBinding Command="{Binding UpdateCommand}" MouseAction="LeftDoubleClick"/>
+
+                </ListViewItem.InputBindings>-->
+                <ListView.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:StandardFailures}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Type, FallbackValue='Type ???'}" Margin="0,0,5,0" Width="90"/>
+                            <TextBlock Text="{Binding Name, FallbackValue='Name ???'}" Margin="0,0,5,0" Width="90"/>
+                            <TextBlock Text="{Binding Rate, FallbackValue='Rate ???', StringFormat=' {0:E2}'}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <StackPanel Height="25" Orientation="Horizontal" HorizontalAlignment="Center" DockPanel.Dock="Bottom">
+                <Button Margin="10,0,10,0" Name="Cancel" Width="100" IsCancel="True" >Cancel</Button>
+                <Button Margin="10,0,10,0" Name="Select" Width="100" IsDefault="True" 
+                        Command="{Binding UpdateCommand}"
+                        CommandParameter="{Binding ItemToUpdate}">
+                    Select</Button>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,103 @@
+﻿<Window x:Class="FaultTreeXl.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FaultTreeXl" Closing="Window_Closing"
+        mc:Ignorable="d" DataContext="{StaticResource GlobalFaultTreeModel}" 
+        Title="{Binding Path=Filename, StringFormat='Fault Tree: {0}'}" Height="450" Width="800">
+    <Window.Resources>
+        <local:GraphicItemTemplateSelector x:Key="GraphicItemTemplateSelector" />
+        <local:GenerateCutSetsCommand x:Key="GenerateCutSetsCommand" />
+        <local:SaveCommand x:Key="SaveCommand" />
+        <local:LoadCommand x:Key="LoadCommand" />
+        <DataTemplate x:Key="NodeTemplate" DataType="{x:Type local:Node}" >
+            <Canvas>
+                <local:NodeControl Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}" DataContext="{Binding}"/>
+            </Canvas>
+        </DataTemplate>
+        <DataTemplate x:Key="DiagnosedFaultTemplate" DataType="{x:Type local:Node}" >
+            <Canvas>
+                <local:DiagnosedFaultControl Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}" DataContext="{Binding}"/>
+            </Canvas>
+        </DataTemplate>
+        <DataTemplate x:Key="ORTemplate" DataType="{x:Type local:OR}" >
+            <Canvas>
+                <local:ORControl Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}" DataContext="{Binding}"/>
+            </Canvas>
+        </DataTemplate>
+        <DataTemplate x:Key="ANDTemplate" DataType="{x:Type local:AND}" >
+            <Canvas>
+                <local:ANDControl Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}" DataContext="{Binding}"/>
+            </Canvas>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="25"/>
+        </Grid.RowDefinitions>
+        <DockPanel>
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="File">
+                    <MenuItem Header="Load" Command="{StaticResource LoadCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Save" Command="{StaticResource SaveCommand}" CommandParameter="{Binding}"/>
+                </MenuItem>
+                <MenuItem Header="Edit">
+                    <MenuItem Header="Add" Command="{StaticResource DummyCommand}" CommandParameter="{Binding Path=HighlightedNode.Name}"/>
+                    <MenuItem Header="Copy" Command="{StaticResource DummyCommand}" CommandParameter="Copy"/>
+                    <MenuItem Header="Cut" Command="{StaticResource DummyCommand}" CommandParameter="Cut"/>
+                    <MenuItem Header="Paste" Command="{StaticResource DummyCommand}" CommandParameter="Paste"/>
+                </MenuItem>
+                <MenuItem Header="View">
+                    <MenuItem Header="Show/Hide Life Info" 
+                              Command="{StaticResource ToggleShowLifeCommand}" 
+                              CommandParameter="{Binding}"/>
+                </MenuItem>
+                <MenuItem Header="Cut Sets" Command="{StaticResource GenerateCutSetsCommand}" CommandParameter="{Binding}"/>
+                <MenuItem Header="Visio" >
+                    <MenuItem Header="Draw in Visio" Command="{StaticResource DrawAsVisioCommand}" CommandParameter="{Binding}"/>
+                </MenuItem>
+                <MenuItem Header="Proof Test Effectiveness">
+                    <MenuItem Header="100%" Command="{StaticResource ProofTest100}" CommandParameter="{StaticResource GlobalFaultTreeModel}" />
+                    <MenuItem Header="90%" Command="{StaticResource ProofTest90}" CommandParameter="{StaticResource GlobalFaultTreeModel}" />
+                </MenuItem>
+                <MenuItem Header="Component Life" >
+                    <MenuItem Header="5 Years" Command="{StaticResource Life5Years}" CommandParameter="{Binding}" />
+                    <MenuItem Header="10 Years" Command="{StaticResource Life10Years}" CommandParameter="{Binding}" />
+                    <MenuItem Header="15 Years" Command="{StaticResource Life15Years}" CommandParameter="{Binding}" />
+                    <MenuItem Header="20 Years" Command="{StaticResource Life20Years}" CommandParameter="{Binding}" />
+                </MenuItem>
+                <MenuItem Header="Calcuations" >
+                    <MenuItem Header="Recalculate" Command="{StaticResource RecalcCommand}" CommandParameter="{Binding}" />
+                    <MenuItem Header="Toggle Force Integration" Command="{StaticResource ToggleForceIntegrationCommand}" CommandParameter="{Binding}" />
+                </MenuItem>
+                <MenuItem Header="Standard Parts" >
+                    <MenuItem Header="Show" Command="{StaticResource ChoosePartCommand}" CommandParameter="{Binding}" />
+                    <MenuItem Header="Calc CCF" Command="{StaticResource CalcCCFCommand}" CommandParameter="{Binding}" />
+                </MenuItem>
+            </Menu>
+            <Grid>
+                <ScrollViewer Name="TheScrollViewer" HorizontalContentAlignment="Center" HorizontalScrollBarVisibility="Visible" 
+                          PreviewMouseWheel="TheScrollViewer_PreviewMouseWheel" >
+                    <ListView ItemsSource="{Binding Path=FaultTree}" ItemTemplateSelector="{StaticResource GraphicItemTemplateSelector}">
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas Width="{Binding Path=Width}" Height="{Binding Path=Height}" Background="LightGray">
+                                    <Canvas.RenderTransform>
+                                        <ScaleTransform CenterX="0" CenterY="0" ScaleX="{Binding Scale}" ScaleY="{Binding Scale}" />
+                                    </Canvas.RenderTransform>
+                                </Canvas>
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                    </ListView>
+                </ScrollViewer>
+            </Grid>
+        </DockPanel>
+        <StatusBar Grid.Row="1">
+            <StatusBarItem >
+                <TextBlock Text="{Binding Status}" />
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

@@ -1,0 +1,81 @@
+﻿<UserControl x:Class="FaultTreeXl.ORControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FaultTreeXl" 
+             Name="theORControl"
+             mc:Ignorable="d" 
+             Height="110" Width="100">
+    <UserControl.Resources>
+        <local:GraphicItem x:Key="theDataContext" X2="0" X3="200" IsSelected="True">
+        </local:GraphicItem>
+
+        <Style TargetType="Rectangle" >
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=IsSelected}" Value="True">
+                    <Setter Property="Fill" Value="Yellow" />
+                </DataTrigger>
+            </Style.Triggers>
+            <Setter Property="Fill" Value="Beige" />
+            <Setter Property="Stroke" Value="Black" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid d:DataContext="{StaticResource theDataContext}">
+        <Canvas>
+            <Canvas.InputBindings>
+                <MouseBinding Gesture="LeftDoubleClick" Command="{StaticResource OREditCommand}">
+                    <MouseBinding.CommandParameter>
+                        <MultiBinding Converter="{StaticResource MultiBindingConverter}">
+                            <Binding />
+                            <Binding RelativeSource="{RelativeSource AncestorType=Window}" />
+                        </MultiBinding>
+                    </MouseBinding.CommandParameter>
+                </MouseBinding>
+                <MouseBinding Gesture="LeftClick" Command="{StaticResource SelectCommand}" CommandParameter="{Binding}">
+                </MouseBinding>
+            </Canvas.InputBindings>
+            <Canvas.ContextMenu>
+                <ContextMenu >
+                    <MenuItem Header="Edit" Click="OREditClicked" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Delete" Command="{StaticResource ORDeleteCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Add an AND below" Command="{StaticResource ANDAddCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Add an OR below" Command="{StaticResource ORAddCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Add a DU Fault below" Command="{StaticResource NodeAddCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Add a DD Fault below" Command="{StaticResource DiagnosedFaultAddCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Add a 2oo3 below" Command="{StaticResource Voted2oo3AddCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Move Right" Command="{StaticResource MoveRightCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Move Up" Command="{StaticResource MoveUpCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Move Down" Command="{StaticResource MoveDownCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Show Cut Sets" Command="{StaticResource ShowCutSetsCommand}" CommandParameter="{Binding}"/>
+                </ContextMenu>
+            </Canvas.ContextMenu>
+            <Line X1="50" Y1="-10" X2="50" Y2="0" Stroke="Black"/>
+            <Rectangle Height="65" Width="100" >
+            </Rectangle>
+            <Line X1="50" Y1="65" X2="50" Y2="80" Stroke="Black"/>
+            <Path Stroke="Black" Fill="Beige" Margin="0,15,0,0">
+                <Path.Data>
+                    <PathGeometry>
+                        <PathFigure StartPoint="25,110">
+                            <ArcSegment Size="50,50" Point="50,65" SweepDirection="Clockwise"  />
+                            <ArcSegment Size="50,50" Point="75,110" SweepDirection="Clockwise"  />
+                            <ArcSegment Size="50,50" Point="25,110" SweepDirection="Counterclockwise"  />
+                        </PathFigure>
+                    </PathGeometry>
+                </Path.Data>
+            </Path>
+            <TextBlock Height="15" Width="100" Text="{Binding Path=Description}" TextAlignment="Center" />
+            <TextBlock Margin="5,15,0,0" Height="15" Width="95" Text="{Binding Path=PFD,StringFormat='PFD: {0:E2}'}" TextAlignment="Center" />
+            <StackPanel Margin="15,30,0,0" Orientation="Horizontal" Width="90" HorizontalAlignment="Center">
+                <TextBlock Height="15" Text="l" FontFamily="Symbol" />
+                <TextBlock Height="15" Text="{Binding Path=Lambda,StringFormat=': {0:E2}/hr'}"/>
+            </StackPanel>
+            <TextBlock Margin="5,45,0,0" Height="15" Width="95" Text="{Binding Path=MDT,StringFormat='MDT: {0:N0} hrs'}" TextAlignment="Center" />
+            <TextBlock Canvas.Left="25" Canvas.Top="100"  Height="25" Width="50" Text="{Binding Path=Name}" TextAlignment="Center" />
+            <Line X1="50" Y1="119" X2="50" Y2="135" Stroke="Black"/>
+            <Line X1="{Binding X2}" Y1="135" X2="{Binding X3}" Y2="135" Stroke="Black"/>
+        </Canvas>
+    </Grid>
+</UserControl>

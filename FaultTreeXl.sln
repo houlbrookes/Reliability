@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.645
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaultTreeXl", "FaultTreeXl\FaultTreeXl.csproj", "{F9C9B84A-71BB-4BF9-A0E0-CE63EEF0F101}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FT_Test", "FT_Test\FT_Test.csproj", "{CEACE13E-0747-4600-A932-EF8259B2269A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F9C9B84A-71BB-4BF9-A0E0-CE63EEF0F101}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9C9B84A-71BB-4BF9-A0E0-CE63EEF0F101}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9C9B84A-71BB-4BF9-A0E0-CE63EEF0F101}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9C9B84A-71BB-4BF9-A0E0-CE63EEF0F101}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEACE13E-0747-4600-A932-EF8259B2269A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEACE13E-0747-4600-A932-EF8259B2269A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEACE13E-0747-4600-A932-EF8259B2269A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEACE13E-0747-4600-A932-EF8259B2269A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2663DA53-1DA2-4EB6-93C7-D72A199B35DD}
+	EndGlobalSection
+EndGlobal
