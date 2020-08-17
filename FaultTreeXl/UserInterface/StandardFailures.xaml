@@ -22,11 +22,6 @@
                       DockPanel.Dock="Top"
                      ItemsSource="{Binding Path=FailureRates}" 
                      SelectedItem="{Binding Path=UpdateCommand.Selected}">
-                <!--<ListViewItem.InputBindings>
-
-                    <MouseBinding Command="{Binding UpdateCommand}" MouseAction="LeftDoubleClick"/>
-
-                </ListViewItem.InputBindings>-->
                 <ListView.ItemTemplate>
                     <DataTemplate DataType="{x:Type local:StandardFailures}">
                         <StackPanel Orientation="Horizontal">

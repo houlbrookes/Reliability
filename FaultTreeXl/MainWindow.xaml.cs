@@ -66,5 +66,6 @@ namespace FaultTreeXl
                 e.Handled = true;
             }
         }
+
     }
 }

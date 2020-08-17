@@ -70,6 +70,10 @@ namespace FaultTreeXl
         [XmlAttribute]
         public string Description { get => description; set => Changed(ref description, value); }
 
+        private string makeModel = "Generic";
+        public string MakeModel { get => makeModel; set => Changed(ref makeModel, value); }
+
+
         [XmlIgnore]
         virtual public List<CutSet> CutSets { get; } = new List<CutSet>();
 
@@ -193,7 +197,7 @@ namespace FaultTreeXl
         virtual public double AssignXY(double x1, double y1)
         {
             double newX = x1;
-            double prevX = x1;
+            //double prevX = x1;
             GraphicItem[] nodeArray = Nodes.ToArray();
             for (int i = 0; i < nodeArray.Length; i++)
             {
@@ -209,7 +213,7 @@ namespace FaultTreeXl
                     // don't update newX unless the NodeX is larger than newX
                     newX = Math.Max(NodeX, newX);
                 }
-                prevX = newX;
+                //prevX = newX;
             }
 
             if (Nodes.Count > 0)

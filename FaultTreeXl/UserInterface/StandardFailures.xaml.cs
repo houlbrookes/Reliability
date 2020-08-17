@@ -49,14 +49,25 @@ namespace FaultTreeXl
 
         public bool CanExecute(object parameter) => true;
 
-        public StandardFailure Selected { get; set; }
+        private StandardFailure _Selected = null;
+        public StandardFailure Selected
+        {
+            get => _Selected;
+            set
+            {
+                _Selected = value;
+            }
+        }
         public Window CalledFromWindow { get; set; }
 
         public void Execute(object parameter)
         {
             if (parameter is GraphicItem item2Update)
             {
-                item2Update.Lambda = Selected.Rate;
+                if (Selected != null)
+                {
+                    item2Update.Lambda = Selected.Rate;
+                }
             }
             CalledFromWindow?.Close();
         }
@@ -120,20 +131,6 @@ namespace FaultTreeXl
             }
         }
 
-        public ObservableCollection<StandardFailure> FailureRates { get; set; } = new ObservableCollection<StandardFailure>
-        {
-            new StandardFailure{Type="Safety Relay", Name="MSR 127", Rate=4.25E-08M },
-            new StandardFailure{Type="Safety Relay", Name="Moores SRM", Rate=1E-06M },
-            new StandardFailure{Type="Relay (Armature)", Name="General", Rate=2.83E-07M },
-            new StandardFailure{Type="Contactor", Name="General", Rate=1.0E-6M },
-            new StandardFailure{Type="Trip Amp", Name="BD 120", Rate=8.74E-07M },
-            new StandardFailure{Type="Trip Amp", Name="Moores STA", Rate=4.57E-07M },
-            new StandardFailure{Type="Trip Amp", Name="PR Electronics TA", Rate=1E-06M },
-            new StandardFailure{Type="Signal Conv", Name="Lee Dickens BD 300", Rate=8.79E-07M },
-            new StandardFailure{Type="Pushbutton", Name="Fail to S/C", Rate=2.00E-07M },
-            new StandardFailure{Type="Thermocouple", Name="Benign Env.", Rate=4.50E-09M },
-            new StandardFailure{Type="Diode", Name="General", Rate=1.00E-09M },
-            new StandardFailure{Type="LED", Name="General", Rate=5.00E-09M },
-        };
+        public ObservableCollection<StandardFailure> FailureRates { get; set; } = new ObservableCollection<StandardFailure> { };
     }
 }

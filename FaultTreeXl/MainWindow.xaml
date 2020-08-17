@@ -72,11 +72,32 @@
                     <MenuItem Header="Recalculate" Command="{StaticResource RecalcCommand}" CommandParameter="{Binding}" />
                     <MenuItem Header="Toggle Force Integration" Command="{StaticResource ToggleForceIntegrationCommand}" CommandParameter="{Binding}" />
                 </MenuItem>
-                <MenuItem Header="Standard Parts" >
+                <!--<MenuItem Header="Standard Parts" >
                     <MenuItem Header="Show" Command="{StaticResource ChoosePartCommand}" CommandParameter="{Binding}" />
                     <MenuItem Header="Calc CCF" Command="{StaticResource CalcCCFCommand}" CommandParameter="{Binding}" />
-                </MenuItem>
+                </MenuItem>-->
             </Menu>
+            <Grid DockPanel.Dock="Left" Width="250">
+                <StackPanel>
+                    <TextBlock Text="{Binding Path=Scale, StringFormat='Scale: {0:P2}'}"/>
+                    <TextBlock Text="{Binding Path=MissionTime, StringFormat='Mission: {0}'}"/>
+                    <CheckBox IsChecked="{Binding Path=ShowLifeInfo}">Show Life Info</CheckBox>
+                    <CheckBox IsChecked="{Binding Path=RootNode.ForceIntegration}">Use Integration</CheckBox>
+                    <TextBlock Text="{Binding Path=RootNode.ProofTestEffectiveness, StringFormat='PTE: {0:P2}'}"/>
+                    <ListBox>
+                        <ListBoxItem Content="OR" />
+                        <ListBoxItem Content="AND" />
+                    </ListBox>
+                    <ListBox ItemsSource="{Binding FailureRates}" >
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <local:StandardFailureControl DataContext="{Binding}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Grid>
+            <Separator DockPanel.Dock="Left" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
             <Grid>
                 <ScrollViewer Name="TheScrollViewer" HorizontalContentAlignment="Center" HorizontalScrollBarVisibility="Visible" 
                           PreviewMouseWheel="TheScrollViewer_PreviewMouseWheel" >

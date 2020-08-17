@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="FaultTreeXl.StandardFailureControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FaultTreeXl"
+             mc:Ignorable="d" d:DataContext="{DynamicResource DataContext}"
+             d:DesignHeight="25" d:DesignWidth="200">
+    <UserControl.Resources>
+        <local:StandardFailure x:Key="DataContext" Name="MSR 127" Type="Safety Relay" Rate="1.00E-6"/>
+    </UserControl.Resources>
+    <Grid>
+        <StackPanel Orientation="Horizontal"
+                MouseDown="STD_MouseDown" 
+                DragEnter="STD_DragEnter" 
+                DragOver="STD_DragOver"
+                DragLeave="STD_DragLeave">
+            <TextBlock Text="{Binding Type}" Margin="0,0,5,0"/>
+            <TextBlock Text="{Binding Name}" Margin="5,0,5,0"/>
+            <TextBlock Text="{Binding Rate, StringFormat={}{0:E2}}" Margin="5,0,5,0"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

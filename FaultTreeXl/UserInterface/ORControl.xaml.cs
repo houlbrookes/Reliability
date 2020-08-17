@@ -39,5 +39,109 @@ namespace FaultTreeXl
             var theWindow = Window.GetWindow(this);
             commandToExecute.Execute(new object[] { node, theWindow });
         }
+
+        private Brush _previousFill = null;
+        private void Canvas_DragEnter(object sender, DragEventArgs e)
+        {
+            base.OnDragEnter(e);
+            _previousFill = ORSymbol.Fill;
+            if (e.Data.GetDataPresent(typeof(Node)) 
+             || e.Data.GetDataPresent(typeof(OR)) 
+             || e.Data.GetDataPresent(typeof(AND)))
+            {
+                ORSymbol.Fill = Brushes.Yellow;
+            }
+        }
+
+        private void Canvas_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.KeyStates.HasFlag(DragDropKeyStates.ControlKey))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.Move;
+            }
+            e.Handled = true;
+        }
+
+        private void Canvas_DragLeave(object sender, DragEventArgs e)
+        {
+            base.OnDragLeave(e);
+            ORSymbol.Fill = _previousFill;
+        }
+
+        private void Canvas_Drop(object sender, DragEventArgs e)
+        {
+            GraphicItem theItem = null;
+            if (e.Data.GetDataPresent(typeof(Node)))
+            {
+                theItem = (Node)e.Data.GetData(typeof(Node));
+            }
+            else if (e.Data.GetDataPresent(typeof(OR)))
+            {
+                theItem = (OR)e.Data.GetData(typeof(OR));
+            }
+            else if (e.Data.GetDataPresent(typeof(AND)))
+            {
+                theItem = (AND)e.Data.GetData(typeof(AND));
+            }
+            else if (e.Data.GetDataPresent(typeof(StandardFailure)))
+            {
+                var ftm = Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel;
+                if (ftm != null)
+                {
+                    var reply = MessageBox.Show("Do you want to update this node", "Update?", MessageBoxButton.YesNo);
+                    if (reply == MessageBoxResult.Yes)
+                    {
+                        var theStdFail = (StandardFailure)e.Data.GetData(typeof(StandardFailure));
+                        var theNewNode = new Node()
+                        {
+                            Name = $"Node {ftm.NextNodeName("Node") + 1}",
+                            Description = theStdFail.Name,
+                            Lambda = theStdFail.Rate
+                        };
+                        (DataContext as OR).Nodes.Add(theNewNode);
+                        ftm.ReDrawRootNode();
+                    }
+                    ORSymbol.Fill = _previousFill;
+                }
+                return;
+            }
+            if (e.KeyStates == DragDropKeyStates.ControlKey)
+            {
+                e.Effects = DragDropEffects.Copy;
+                if (theItem != null && (theItem as OR) != (DataContext as OR))
+                {
+                    //theItem.Parent.Nodes.Remove(theItem);
+                    //var newItem = theItem.DeepCopy
+                    //(DataContext as OR).Nodes.Add(theItem);
+                }
+            }
+            else
+            {
+                e.Effects = DragDropEffects.Move;
+                if (theItem != null && (theItem as OR) != (DataContext as OR))
+                {
+                    theItem.Parent.Nodes.Remove(theItem);
+                    (DataContext as OR).Nodes.Add(theItem);
+                }
+            }
+            ORSymbol.Fill = _previousFill;
+            (Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel).ReDrawRootNode();
+        }
+
+        private void Canvas_MouseMove(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var element = (UIElement)sender;
+            if (element != null && e.LeftButton == MouseButtonState.Pressed)
+                DragDrop.DoDragDrop(element, DataContext, DragDropEffects.Copy | DragDropEffects.Move);
+        }
     }
 }

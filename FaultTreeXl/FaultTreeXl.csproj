@@ -40,7 +40,13 @@
     <Reference Include="MathNet.Numerics, Version=4.9.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MathNet.Numerics.4.9.1\lib\net461\MathNet.Numerics.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="Microsoft.Office.Interop.Visio, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Word, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="System" />
@@ -107,11 +113,15 @@
     <Compile Include="Commands\PT90Command.cs" />
     <Compile Include="Commands\RecalcCommand.cs" />
     <Compile Include="Commands\SelectCommand.cs" />
+    <Compile Include="Commands\ShowCalcsCommand.cs" />
     <Compile Include="Commands\ShowCutSetsCommand.cs" />
     <Compile Include="Commands\ToggleForceIntegrationCommand.cs" />
     <Compile Include="Commands\ToggleLifeCommand.cs" />
     <Compile Include="Commands\UpdateNodeFromStandardCommand.cs" />
     <Compile Include="Commands\Voted2oo3AddCommand.cs" />
+    <Compile Include="UserInterface\StandardFailureControl.xaml.cs">
+      <DependentUpon>StandardFailureControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserInterface\DiagnosedFaultControl.xaml.cs">
       <DependentUpon>DiagnosedFaultControl.xaml</DependentUpon>
     </Compile>
@@ -146,6 +156,10 @@
       <DependentUpon>StandardParts.xaml</DependentUpon>
     </Compile>
     <Page Include="CCFWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserInterface\StandardFailureControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

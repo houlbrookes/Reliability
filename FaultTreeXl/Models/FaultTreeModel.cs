@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -56,6 +57,26 @@ namespace FaultTreeXl
             set => Changed(ref _showLifeInfo, value);
         }
 
+        [XmlIgnore]
+        public ObservableCollection<StandardFailure> FailureRates { get; set; } = new ObservableCollection<StandardFailure> { };
+        public static void LoadList(ObservableCollection<StandardFailure> list)
+        {
+            string fileName = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "StandardParts.xml");
+            //Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+            //System.Reflection.Assembly.GetExecutingAssembly().Location
+            using (StreamReader streamReader = new StreamReader(fileName))
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(ObservableCollection<StandardFailure>));
+                ObservableCollection<StandardFailure> data = serializer.Deserialize(streamReader) as ObservableCollection<StandardFailure>;
+                list.Clear();
+                foreach (StandardFailure x in data)
+                {
+                    list.Add(x);
+                }
+            }
+        }
+
+
         private void DrawGraphics(GraphicItem graphic)
         {
             graphic.PropertyChanged -= Graphic_PropertyChanged;
@@ -109,7 +130,11 @@ namespace FaultTreeXl
 
         private double _Scale = 1.0;
         [XmlIgnore]
-        public double Scale { get => _Scale; set => Changed(ref _Scale, value); }
+        public double Scale
+        {
+            get => _Scale;
+            set => Changed(ref _Scale, value);
+        }
 
         public FaultTreeModel()
         {
@@ -188,6 +213,8 @@ namespace FaultTreeXl
 
             RootNode.Recalculating += (sender, _notused) => Status = "Recalculating...";
             RootNode.CalculationsComplete += (sender, _notused) => Status = "Calculations complete";
+
+            LoadList(FailureRates);
         }
     }
 }

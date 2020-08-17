@@ -37,6 +37,7 @@
         <local:GetFailRateCommand x:Key="GetFailRateCommand" />
         <local:ShowCutSetsCommand x:Key="ShowCutSetsCommand" />
         <local:CCFCommand x:Key="CCFCommand" />
+        <local:ShowCalcsCommand x:Key="ShowCalcsCommand" />
 
         <local:DummyCommand x:Key="DummyCommand"     />
 

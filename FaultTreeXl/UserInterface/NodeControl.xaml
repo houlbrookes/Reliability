@@ -4,8 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:FaultTreeXl"
-             mc:Ignorable="d" d:DataContext="{StaticResource GlobalNode}" DataContextChanged="UserControl_DataContextChanged"
-             d:DesignHeight="450" d:DesignWidth="800">
+             mc:Ignorable="d" d:DataContext="{StaticResource GlobalNode}" 
+             d:DesignHeight="130" d:DesignWidth="100">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <Style TargetType="Rectangle" >
@@ -21,7 +21,11 @@
     </UserControl.Resources>
 
     <Grid >
-        <Canvas>
+        <Canvas Name="theCanvas" MouseDown="Canvas_MouseDown" AllowDrop="True"
+                DragEnter="theCanvas_DragEnter" 
+                DragOver="theCanvas_DragOver"
+                DragLeave="theCanvas_DragLeave"
+                Drop="theCanvas_Drop">
             <Canvas.InputBindings>
                 <MouseBinding Gesture="LeftDoubleClick" Command="{StaticResource OREditCommand}">
                     <MouseBinding.CommandParameter>
@@ -31,8 +35,8 @@
                         </MultiBinding>
                     </MouseBinding.CommandParameter>
                 </MouseBinding>
-                <MouseBinding Gesture="LeftClick" Command="{StaticResource SelectCommand}" CommandParameter="{Binding}">
-                </MouseBinding>
+                <!--<MouseBinding Gesture="LeftClick" Command="{StaticResource SelectCommand}" CommandParameter="{Binding}">
+                </MouseBinding>-->
             </Canvas.InputBindings>
             <Canvas.ContextMenu>
                 <ContextMenu>
@@ -48,7 +52,8 @@
             <Line X1="50" Y1="-10" X2="50" Y2="0" Stroke="Black"/>
             <Rectangle Height="65" Width="100" />
             <Line X1="50" Y1="65" X2="50" Y2="75" Stroke="Black"/>
-            <Ellipse Height="50" Width="50" Canvas.Left="25" Canvas.Top="75" Fill="Beige" Stroke="Black"/>
+            <Ellipse Name="NodeSymbol" Height="60" Width="60" Canvas.Left="20" Canvas.Top="70" Fill="Beige" Stroke="Black"/>
+            <Rectangle Height="30" Width="90" Fill="Beige" Canvas.Left="5" Canvas.Top="85"/>
             <TextBlock Height="50" Width="100" Text="{Binding Path=Description}" TextAlignment="Center" />
             <StackPanel Margin="15,30,0,0" Orientation="Horizontal" Width="90" HorizontalAlignment="Center">
                 <TextBlock Height="15" Text="l" FontFamily="Symbol" />
@@ -56,7 +61,9 @@
             </StackPanel>
             <TextBlock Margin="5,15,0,0" Height="15" Width="90" Text="{Binding Path=PFD,StringFormat='PFD: {0:E2}'}" TextAlignment="Center" />
             <TextBlock Margin="5,45,0,0" Height="15" Width="90" Text="{Binding Path=PTI,StringFormat='PTI: {0:N0} hrs'}" TextAlignment="Center" />
-            <TextBlock Canvas.Left="25" Canvas.Top="92"  Height="15" Width="50" Text="{Binding Path=Name}" TextAlignment="Center" />
+            <Border Canvas.Left="5" Canvas.Top="85" Height="30" Width="90">
+                <TextBlock Text="{Binding Path=Name}" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"/>
+            </Border>
             <TextBlock Visibility="{Binding Path=ShowLifeInfo, Converter={StaticResource BooleanToVisibilityConverter}}"
                 Canvas.Left="72" Canvas.Top="73"  Height="15" Width="100" Text="{Binding Path=ProofTestEffectiveness, StringFormat='PTE: {0:P0}'}" TextAlignment="Left" />
             <TextBlock Visibility="{Binding Path=ShowLifeInfo, Converter={StaticResource BooleanToVisibilityConverter}}"
