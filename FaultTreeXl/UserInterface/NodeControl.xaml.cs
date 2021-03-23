@@ -23,27 +23,26 @@ namespace FaultTreeXl
         public NodeControl()
         {
             InitializeComponent();
-        }
-        private void EditClicked(object sender, RoutedEventArgs e)
-        {
-            var commandToExecute = new OREditCommand();
-            var node = DataContext;
-            var theWindow = Window.GetWindow(this);
-            commandToExecute.Execute(new object[] { node, theWindow });
+
+            _previousFillNodeSymbol = NodeSymbol.Fill;
+            _previousFillNodeName = NodeNameRectangle.Fill;
+            _previousFillNodeDescRectangle = NodeDescRectangle.Background;
+
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
-        }
-        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            var element = (UIElement)sender;
-            if (element != null && e.LeftButton == MouseButtonState.Pressed)
-                DragDrop.DoDragDrop(element, DataContext, DragDropEffects.Copy | DragDropEffects.Move );
-        }
+            if (sender is UIElement element)
+            {
+                if (e.LeftButton == MouseButtonState.Pressed)
+                {
+                    NodeSymbol.Fill = Brushes.LightGray;
+                    NodeNameRectangle.Fill = Brushes.LightGray;
+                    NodeDescRectangle.Background = Brushes.LightGray;
 
-        private void Canvas_MouseUp(object sender, MouseButtonEventArgs e)
-        {
+                    DragDrop.DoDragDrop(element, DataContext, DragDropEffects.Copy | DragDropEffects.Move);
+                }
+            }
         }
 
         private void theCanvas_DragOver(object sender, DragEventArgs e)
@@ -59,23 +58,61 @@ namespace FaultTreeXl
             e.Handled = true;
         }
 
-        Brush _previousFill = null;
+        Brush _previousFillNodeSymbol = null;
+        Brush _previousFillNodeName = null;
+        Brush _previousFillNodeDescRectangle = null;
+
         private void theCanvas_DragEnter(object sender, DragEventArgs e)
         {
             base.OnDragEnter(e);
-            _previousFill = NodeSymbol.Fill;
-            if (e.Data.GetDataPresent(typeof(Node))
-             || e.Data.GetDataPresent(typeof(OR))
-             || e.Data.GetDataPresent(typeof(AND)))
+
+            bool thisIsADifferentNode = true;
+
+            Node theDraggedItem = null;
+
+            if (e.Data.GetDataPresent(typeof(Node)))
             {
-                NodeSymbol.Fill = Brushes.Yellow;
+                theDraggedItem = (Node)e.Data.GetData(typeof(Node));
+                thisIsADifferentNode = theDraggedItem != (DataContext as Node);
+            }
+
+            if (thisIsADifferentNode)
+            {
+                if (e.Data.GetDataPresent(typeof(Node))
+                 || e.Data.GetDataPresent(typeof(OR))
+                 || e.Data.GetDataPresent(typeof(AND)))
+                {
+                    NodeSymbol.Fill = Brushes.Yellow;
+                    NodeNameRectangle.Fill = Brushes.Yellow;
+                    NodeDescRectangle.Background = Brushes.Yellow;
+                }
+            }
+            else
+            {
+                // Do nothing
             }
         }
 
         private void theCanvas_DragLeave(object sender, DragEventArgs e)
         {
             base.OnDragLeave(e);
-            NodeSymbol.Fill = _previousFill;
+
+            bool thisIsADifferentNode = true;
+
+            Node theDraggedItem = null;
+
+            if (e.Data.GetDataPresent(typeof(Node)))
+            {
+                theDraggedItem = (Node)e.Data.GetData(typeof(Node));
+                thisIsADifferentNode = theDraggedItem != (DataContext as Node);
+            }
+
+            if (thisIsADifferentNode)
+            {
+                NodeSymbol.Fill = _previousFillNodeSymbol;
+                NodeNameRectangle.Fill = _previousFillNodeName;
+                NodeDescRectangle.Background = _previousFillNodeDescRectangle;
+            }
         }
 
         private void theCanvas_Drop(object sender, DragEventArgs e)
@@ -91,7 +128,7 @@ namespace FaultTreeXl
                 if (theItem != null && (theItem as Node) != (DataContext as Node))
                 {
                     var thisItem = DataContext as Node;
-                    thisItem.Lambda = theItem.Lambda;
+                    thisItem.BetaFreeLambda = theItem.BetaFreeLambda;
                     thisItem.PTI = theItem.PTI;
                     thisItem.Description = theItem.Description;
                     thisItem.LifeTime = theItem.LifeTime;
@@ -106,15 +143,15 @@ namespace FaultTreeXl
                     {
                         var theStdFail = (StandardFailure)e.Data.GetData(typeof(StandardFailure));
                         var thisItem = DataContext as Node;
-                        thisItem.Lambda = theStdFail.Rate;
+                        thisItem.BetaFreeLambda = theStdFail.Rate;
                         thisItem.MakeModel =  theStdFail.Type+ "/" + theStdFail.Name;
-                        NodeSymbol.Fill = _previousFill;
+                        NodeSymbol.Fill = _previousFillNodeSymbol;
                         ftm.ReDrawRootNode();
                     }
                     return;
                 }
             }
-            NodeSymbol.Fill = _previousFill;
+            NodeSymbol.Fill = _previousFillNodeSymbol;
             (Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel).ReDrawRootNode();
         }
     }

@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace FaultTreeXl
 {
-    class ORDeleteCommand : ICommand
+    internal class DeleteCommand : ICommand
     {
         public event EventHandler CanExecuteChanged
         {
@@ -25,19 +25,24 @@ namespace FaultTreeXl
         {
             if (parameter is GraphicItem theOR)
             {
-                if (!(theOR.Parent is null))
+                if (theOR.Parent is null)
+                {
+                    MessageBox.Show("You cannot delete the root node");
+                }
+                else
                 {
                     var res = MessageBox.Show(
                         "Are you sure?", 
                         "Delete Object", 
                         MessageBoxButton.YesNo, 
-                        MessageBoxImage.Exclamation, 
+                        MessageBoxImage.Question, 
                         MessageBoxResult.No);
                     if (res == MessageBoxResult.Yes)
                     {
                         theOR.Parent.Nodes.Remove(theOR);
                         (Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel).ReDrawRootNode();
                     }
+
                 }
             }
         }

@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace FaultTreeXl
 {
-    public class GetFailRateCommand : ICommand
+    public class ResetScaleCommand : ICommand
     {
         public event EventHandler CanExecuteChanged
         {
@@ -21,11 +21,9 @@ namespace FaultTreeXl
         {
             try
             {
-                if (parameter is GraphicItem node)
+                if (parameter is FaultTreeModel faultTreeModel)
                 {
-                    var form = new StandardFailures();
-                    form.DataContext = new StandardFailiuresController() { ItemToUpdate = node, CalledFromWindow=form };
-                    form.ShowDialog();
+                    faultTreeModel.Scale = 1.0;
                 }
             }
             catch (Exception e)
@@ -33,7 +31,6 @@ namespace FaultTreeXl
                 MessageBox.Show(e.Message);
             }
         }
-
     }
 
 }

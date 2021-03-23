@@ -7,67 +7,186 @@
              mc:Ignorable="d" d:DataContext="{StaticResource GlobalNode}" 
              d:DesignHeight="130" d:DesignWidth="100">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+       
         <Style TargetType="Rectangle" >
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding Path=IsSelected}" Value="True">
-                    <Setter Property="Fill" Value="Yellow" />
-                </DataTrigger>
-            </Style.Triggers>
             <Setter Property="Fill" Value="Beige" />
             <Setter Property="Stroke" Value="Black" />
         </Style>
 
+        <LinearGradientBrush x:Key="NodeNameRectangleGradient" EndPoint="0.5,1.5" StartPoint="0.5,0">
+            <GradientStop Color="LightBlue" Offset="0.0"/>
+            <GradientStop Color="Beige" Offset="0.2"/>
+            <GradientStop Color="LightBlue" Offset="0.8"/>
+        </LinearGradientBrush>
+
     </UserControl.Resources>
 
-    <Grid >
-        <Canvas Name="theCanvas" MouseDown="Canvas_MouseDown" AllowDrop="True"
+    <Grid Name="theGrid" Tag="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
+        <Canvas Name="theCanvas" MouseMove="Canvas_MouseMove" AllowDrop="True"
                 DragEnter="theCanvas_DragEnter" 
                 DragOver="theCanvas_DragOver"
                 DragLeave="theCanvas_DragLeave"
                 Drop="theCanvas_Drop">
             <Canvas.InputBindings>
-                <MouseBinding Gesture="LeftDoubleClick" Command="{StaticResource OREditCommand}">
-                    <MouseBinding.CommandParameter>
-                        <MultiBinding Converter="{StaticResource MultiBindingConverter}">
-                            <Binding />
-                            <Binding RelativeSource="{RelativeSource AncestorType=Window}" />
-                        </MultiBinding>
-                    </MouseBinding.CommandParameter>
-                </MouseBinding>
-                <!--<MouseBinding Gesture="LeftClick" Command="{StaticResource SelectCommand}" CommandParameter="{Binding}">
-                </MouseBinding>-->
+                <MouseBinding Gesture="LeftDoubleClick" Command="{StaticResource OREditCommand}" CommandParameter="{Binding}" />
             </Canvas.InputBindings>
-            <Canvas.ContextMenu>
+            <Canvas.ContextMenu >
                 <ContextMenu>
-                    <MenuItem Header="Edit" Click="EditClicked" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Edit" Command="{StaticResource OREditCommand}" CommandParameter="{Binding}" />
                     <MenuItem Header="Delete" Command="{StaticResource ORDeleteCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Move Right" Command="{StaticResource MoveRightCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Move Up" Command="{StaticResource MoveUpCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Move Down" Command="{StaticResource MoveDownCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Add Standard Failiure Rate" Command="{StaticResource GetFailRateCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Calc CCF" Command="{StaticResource CCFCommand}" CommandParameter="{Binding}"/>
+                    <!--<MenuItem Header="Add Standard Failiure Rate" Command="{StaticResource GetFailRateCommand}" CommandParameter="{Binding}"/>-->
+                    <MenuItem Header="Calc CCF" Command="{StaticResource CCFCommand}" CommandParameter="{Binding}">
+                        <MenuItem.Style>
+                            <Style TargetType="MenuItem" >
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=IsCCF}" Value="True">
+                                        <Setter Property="IsEnabled" Value="True" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+
+                    </MenuItem>
                 </ContextMenu>
             </Canvas.ContextMenu>
             <Line X1="50" Y1="-10" X2="50" Y2="0" Stroke="Black"/>
-            <Rectangle Height="65" Width="100" />
+            <Border Name="NodeDescRectangle" BorderBrush="Black" Background="LightBlue" CornerRadius="5,5,5,5" Height="65" Width="100" BorderThickness="1">
+                <Rectangle Height="65" Width="100" StrokeThickness="0">
+                    <Rectangle.Fill>
+                        <SolidColorBrush Color="Transparent" />
+                    </Rectangle.Fill>
+                </Rectangle>
+            </Border>
             <Line X1="50" Y1="65" X2="50" Y2="75" Stroke="Black"/>
-            <Ellipse Name="NodeSymbol" Height="60" Width="60" Canvas.Left="20" Canvas.Top="70" Fill="Beige" Stroke="Black"/>
-            <Rectangle Height="30" Width="90" Fill="Beige" Canvas.Left="5" Canvas.Top="85"/>
-            <TextBlock Height="50" Width="100" Text="{Binding Path=Description}" TextAlignment="Center" />
+            <TextBlock Canvas.Left="80" FontFamily="Symbol" Canvas.Top="70"  Text="{Binding Path=Beta, StringFormat='b={0}%'}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" >
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=Beta}" Value="0">
+                                <Setter Property="Visibility" Value="Hidden" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Visibility" Value="Visible" />
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <Ellipse Name="NodeSymbol" Height="60" Width="60" Canvas.Left="20" Canvas.Top="70" Stroke="Black" >
+                <Ellipse.Style>
+                    <Style TargetType="Ellipse" >
+                        <Setter Property="Fill" Value="LightBlue" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=IsCCF}" Value="True">
+                                <Setter Property="Fill" Value="HotPink" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Ellipse.Style>
+
+            </Ellipse>
+            <Rectangle Name="NodeNameRectangle" Height="30" Width="90" Canvas.Left="5" Canvas.Top="85" Fill="{StaticResource NodeNameRectangleGradient}">
+            </Rectangle>
+            <TextBlock  Margin="4,3,0,0" Height="15" Width="92" Text="{Binding Path=Description}" TextAlignment="Center" >
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" >
+                        <Setter Property="Background" Value="Transparent" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=Description}" Value="No description" >
+                                <Setter Property="Background" Value="Yellow" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
             <StackPanel Margin="15,30,0,0" Orientation="Horizontal" Width="90" HorizontalAlignment="Center">
                 <TextBlock Height="15" Text="l" FontFamily="Symbol" />
-                <TextBlock Height="15" Text="{Binding Path=Lambda,StringFormat=': {0:E2}/hr'}"/>
+                <TextBlock Height="15" Text="{Binding Path=BetaFreeLambda,StringFormat=': {0:E2}/hr'}"/>
             </StackPanel>
             <TextBlock Margin="5,15,0,0" Height="15" Width="90" Text="{Binding Path=PFD,StringFormat='PFD: {0:E2}'}" TextAlignment="Center" />
             <TextBlock Margin="5,45,0,0" Height="15" Width="90" Text="{Binding Path=PTI,StringFormat='PTI: {0:N0} hrs'}" TextAlignment="Center" />
             <Border Canvas.Left="5" Canvas.Top="85" Height="30" Width="90">
                 <TextBlock Text="{Binding Path=Name}" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"/>
             </Border>
-            <TextBlock Visibility="{Binding Path=ShowLifeInfo, Converter={StaticResource BooleanToVisibilityConverter}}"
-                Canvas.Left="72" Canvas.Top="73"  Height="15" Width="100" Text="{Binding Path=ProofTestEffectiveness, StringFormat='PTE: {0:P0}'}" TextAlignment="Left" />
-            <TextBlock Visibility="{Binding Path=ShowLifeInfo, Converter={StaticResource BooleanToVisibilityConverter}}"
-                Canvas.Left="72" Canvas.Top="110"  Height="15" Width="100" Text="{Binding Path=LifeTime, StringFormat='T: {0:N0} hrs'}" TextAlignment="Left" />
+            <TextBlock Canvas.Left="80" Canvas.Top="115"  Height="15" Width="100" Text="{Binding Path=ProofTestEffectiveness, StringFormat='c={0:P0}'}" TextAlignment="Left" >
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" >
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=ProofTestEffectiveness}" Value="1" >
+                                <Setter Property="Visibility" Value="Hidden" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBlock Canvas.Left="80" Canvas.Top="130"  Height="15" Width="100" 
+                       Text="{Binding Path=LifeTime, StringFormat='L={0:###,##0 hrs}'}" TextAlignment="Left" >
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" >
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=ProofTestEffectiveness}" Value="1" >
+                                <Setter Property="Visibility" Value="Hidden" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBlock Canvas.Left="72" Canvas.Top="73"  
+                       Height="15" Width="100" 
+                       Text="{Binding Path=ProofTestEffectiveness, StringFormat='PTE: {0:P0}'}" TextAlignment="Left">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility"  Value="Hidden"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ShowLifeInfo}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBlock Canvas.Left="72" Canvas.Top="110" Height="15" Width="100" 
+                       Text="{Binding Path=LifeTime, StringFormat='T: {0:N0} hrs'}" TextAlignment="Left">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Hidden"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ShowLifeInfo}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBlock >
+                <Run >PFD:</Run><Run Text="{Binding Path=SimulatedPFD,StringFormat=' {0:E2}', Mode=OneWay}"/>
+                <LineBreak/>
+                <Run FontFamily="Symbol">l:</Run><Run Text="{Binding Path=SimulatedFailureRate,StringFormat=' {0:E2}', Mode=OneWay}"/> /hr
+                <LineBreak/>
+                <Run >MDT:</Run><Run Text="{Binding Path=SimulatedMeanDowntime,StringFormat=' {0:###,##0}', Mode=OneWay}"/> hrs
+                <LineBreak/>
+                <Run >Events:</Run><Run Text="{Binding Path=FailureCount,StringFormat=' {0:###,##0}', Mode=OneWay}"/>
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Hidden"/>
+                        <Setter Property="Canvas.Left" Value="5" />
+                        <Setter Property="Canvas.Top" Value="145" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=DataContext.ShowSimulationResults, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="True" >
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=Name}" Value="CCF" >
+                                <Setter Property="Canvas.Left" Value="110" />
+                                <Setter Property="Canvas.Top" Value="12" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
         </Canvas>
     </Grid>
 </UserControl>

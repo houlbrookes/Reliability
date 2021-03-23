@@ -27,6 +27,9 @@ namespace FaultTreeXl
 
         private void STD_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            // Mouse Down initiates a drag session
+            // DataContext is of type StandardFailure from the collection 
+            // declared in FaultTreeModel
             var element = (UIElement)sender;
             if (element != null && e.LeftButton == MouseButtonState.Pressed)
                 DragDrop.DoDragDrop(element, DataContext, DragDropEffects.Copy | DragDropEffects.Move);
@@ -34,17 +37,17 @@ namespace FaultTreeXl
 
         private void STD_DragEnter(object sender, DragEventArgs e)
         {
-
+            // Not used
         }
 
         private void STD_DragOver(object sender, DragEventArgs e)
         {
-
+            // Not used
         }
 
         private void STD_DragLeave(object sender, DragEventArgs e)
         {
-
+            // Not used
         }
     }
 }

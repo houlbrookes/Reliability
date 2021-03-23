@@ -47,16 +47,16 @@ namespace FaultTreeXl
                 theApp.ActiveWindow.Page.PageSheet.CellsSRC[visSectionObject, visRowPage, visPageHeight].FormulaU = "210 mm";
                 theApp.ActiveWindow.Page.PageSheet.CellsSRC[visSectionObject, visRowPrintProperties, visPrintPropertiesPageOrientation].FormulaForceU = "2";
 
-                // Put the proof test assumptions in a box on the Top lefthand corner
-                var infoTextBox = page.DrawRectangle(0, 0, 1, 0.5);
-                infoTextBox.Text = $"Proof Test Effectiveness: {ftm.ProofTestEffectiveness}\nMission Time: {ftm.MissionTime:N0}";
-                infoTextBox.Cells["PinX"].Formula = "6.35 mm";
-                infoTextBox.Cells["PinY"].Formula = "203.65 mm";
-                infoTextBox.Cells["Width"].Formula = "55 mm";
-                infoTextBox.Cells["Height"].Formula = "15 mm";
-                infoTextBox.Cells["LocPinX"].Formula = "Width*0";
-                infoTextBox.Cells["LocPinY"].Formula = "Height*1";
-                infoTextBox.CellsSRC[visSectionParagraph, 0, visHorzAlign].FormulaU = "0"; //VisHorizontalAlignTypes.visHorzAlignLeft
+                //// Put the proof test assumptions in a box on the Top lefthand corner
+                //var infoTextBox = page.DrawRectangle(0, 0, 1, 0.5);
+                //infoTextBox.Text = $"Proof Test Effectiveness: {ftm.ProofTestEffectiveness}\nMission Time: {ftm.MissionTime:N0}";
+                //infoTextBox.Cells["PinX"].Formula = "6.35 mm";
+                //infoTextBox.Cells["PinY"].Formula = "203.65 mm";
+                //infoTextBox.Cells["Width"].Formula = "55 mm";
+                //infoTextBox.Cells["Height"].Formula = "15 mm";
+                //infoTextBox.Cells["LocPinX"].Formula = "Width*0";
+                //infoTextBox.Cells["LocPinY"].Formula = "Height*1";
+                //infoTextBox.CellsSRC[visSectionParagraph, 0, visHorzAlign].FormulaU = "0"; //VisHorizontalAlignTypes.visHorzAlignLeft
 
                 // Draw the fault tree
                 foreach (GraphicItem graphic in ftm.FaultTree)
@@ -71,13 +71,13 @@ namespace FaultTreeXl
                     // draw an ellipse for the Nodes
                     if (graphic is Node)
                     {
-                        graphic.BodyShape = page.DrawGraphicEllipse(graphic, x: 20, y: 55, width: 60, height: 60);
+                        graphic.BodyShape = page.DrawGraphicEllipse(graphic, x: 22.5, y: 55, width: 55, height: 55);
                         graphic.BodyShape.AddConnectionPoint(width: 0.5, height: 0.0, fromBelow: true);
                         graphic.BodyShape.AddConnectionPoint(width: 0.5, height: 1.0, fromBelow: false);
                     }
                     else if (graphic is DiagnosedFaultNode)
                     {
-                        graphic.BodyShape = page.DrawGraphicEllipse(graphic, x: 25, y: 60, width: 50, height: 50);
+                        graphic.BodyShape = page.DrawGraphicEllipse(graphic, x: 22.5, y: 55, width: 55, height: 55);
                         graphic.BodyShape.AddConnectionPoint(width: 0.5, height: 0.0, fromBelow: true);
                         graphic.BodyShape.AddConnectionPoint(width: 0.5, height: 1.0, fromBelow: false);
                     }
@@ -116,7 +116,7 @@ namespace FaultTreeXl
                     Microsoft.Office.Interop.Visio.Shape TextRect= null;
                     if (graphic is Node theNode)
                     {
-                        TextRect = page.DrawRect(graphic, 10, 75, width:80, height:20);
+                        TextRect = page.DrawRect(graphic, 10, 70, width:80, height:30);
                         TextRect.Text = $"{graphic.Name}";
                         TextRect.Characters.CharProps[(short)VisCellIndices.visCharacterSize] = 8;
                     }
@@ -124,7 +124,8 @@ namespace FaultTreeXl
                     {
                         TextRect = page.DrawRect(graphic, 10, 70, width: 80, height: 30);
                         var qText = graphic.PFD.ToString("E2");
-                        TextRect.Text = $"{graphic.Name}\nQ={qText}";
+                        //TextRect.Text = $"{graphic.Name}\nQ={qText}"; not usefull for AWE
+                        TextRect.Text = $"{graphic.Name}";
                         TextRect.Characters.CharProps[(short)VisCellIndices.visCharacterSize] = 8;
                     }
                     graphic.BodyShape.Characters.CharProps[(short)VisCellIndices.visCharacterSize] = 8;

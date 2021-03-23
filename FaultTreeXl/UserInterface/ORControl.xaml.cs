@@ -34,7 +34,7 @@ namespace FaultTreeXl
         /// <param name="e"></param>
         private void OREditClicked(object sender, RoutedEventArgs e)
         {
-            var commandToExecute = new OREditCommand();
+            var commandToExecute = new EditCommand();
             var node = DataContext;
             var theWindow = Window.GetWindow(this);
             commandToExecute.Execute(new object[] { node, theWindow });
@@ -92,19 +92,15 @@ namespace FaultTreeXl
                 var ftm = Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel;
                 if (ftm != null)
                 {
-                    var reply = MessageBox.Show("Do you want to update this node", "Update?", MessageBoxButton.YesNo);
-                    if (reply == MessageBoxResult.Yes)
+                    var theStdFail = (StandardFailure)e.Data.GetData(typeof(StandardFailure));
+                    var theNewNode = new Node()
                     {
-                        var theStdFail = (StandardFailure)e.Data.GetData(typeof(StandardFailure));
-                        var theNewNode = new Node()
-                        {
-                            Name = $"Node {ftm.NextNodeName("Node") + 1}",
-                            Description = theStdFail.Name,
-                            Lambda = theStdFail.Rate
-                        };
-                        (DataContext as OR).Nodes.Add(theNewNode);
-                        ftm.ReDrawRootNode();
-                    }
+                        Name = $"Node {ftm.NextNodeName("Node") + 1}",
+                        Description = theStdFail.Name,
+                        Lambda = theStdFail.Rate
+                    };
+                    (DataContext as OR).Nodes.Add(theNewNode);
+                    ftm.ReDrawRootNode();
                     ORSymbol.Fill = _previousFill;
                 }
                 return;
@@ -132,16 +128,18 @@ namespace FaultTreeXl
             (Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel).ReDrawRootNode();
         }
 
+
+
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
-
+            if (sender is UIElement element)
+            {
+                if (e.LeftButton == MouseButtonState.Pressed)
+                {
+                    DragDrop.DoDragDrop(element, DataContext, DragDropEffects.Copy | DragDropEffects.Move);
+                }
+            }
         }
 
-        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            var element = (UIElement)sender;
-            if (element != null && e.LeftButton == MouseButtonState.Pressed)
-                DragDrop.DoDragDrop(element, DataContext, DragDropEffects.Copy | DragDropEffects.Move);
-        }
     }
 }

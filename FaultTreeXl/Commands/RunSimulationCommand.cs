@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Input;
+using System.Collections.Generic;
+using System.Windows;
 
 namespace FaultTreeXl
 {
-    class CalcCCFCommand : ICommand
+    class RunSimulationCommand : ICommand
     {
         public event EventHandler CanExecuteChanged
         {
@@ -15,13 +18,12 @@ namespace FaultTreeXl
 
         public void Execute(object parameter)
         {
-            if (parameter is FaultTreeModel ftm)
+            if (parameter is FaultTreeModel model)
             {
-                var form = new UserInterface.CalcCCF();
-                form.FTA = ftm;
-                form.ShowDialog();
+                model.StartSimulation();
             }
         }
+
     }
 
 }

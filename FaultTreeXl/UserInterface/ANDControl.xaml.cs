@@ -33,7 +33,7 @@ namespace FaultTreeXl
 
         private void EditClicked(object sender, RoutedEventArgs e)
         {
-            var commandToExecute = new OREditCommand();
+            var commandToExecute = new EditCommand();
             var node = DataContext;
             var theWindow = Window.GetWindow(this);
             commandToExecute.Execute(new object[] { node, theWindow });
@@ -106,14 +106,13 @@ namespace FaultTreeXl
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
-
-        }
-
-        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            var element = (UIElement)sender;
-            if (element != null && e.LeftButton == MouseButtonState.Pressed)
-                DragDrop.DoDragDrop(element, DataContext, DragDropEffects.Copy | DragDropEffects.Move);
+            if (sender is UIElement element)
+            {
+                if (e.LeftButton == MouseButtonState.Pressed)
+                {
+                    DragDrop.DoDragDrop(element, DataContext, DragDropEffects.Copy | DragDropEffects.Move);
+                }
+            }
         }
     }
 }

@@ -11,20 +11,13 @@
     </UserControl.Resources>
 
     <Grid d:DataContext="{StaticResource DataModel}">
-        <Canvas AllowDrop="True" DragEnter="Canvas_DragEnter" DragOver="Canvas_DragOver" DragLeave="Canvas_DragLeave" Drop="Canvas_Drop" MouseDown="Canvas_MouseDown">
+        <Canvas AllowDrop="True" DragEnter="Canvas_DragEnter" DragOver="Canvas_DragOver" DragLeave="Canvas_DragLeave" Drop="Canvas_Drop" MouseMove="Canvas_MouseMove">
             <Canvas.InputBindings>
-                <MouseBinding Gesture="LeftDoubleClick" Command="{StaticResource OREditCommand}">
-                    <MouseBinding.CommandParameter>
-                        <MultiBinding Converter="{StaticResource MultiBindingConverter}">
-                            <Binding />
-                            <Binding RelativeSource="{RelativeSource AncestorType=Window}" />
-                        </MultiBinding>
-                    </MouseBinding.CommandParameter>
-                </MouseBinding>
+                <MouseBinding Gesture="LeftDoubleClick" Command="{StaticResource OREditCommand}" CommandParameter="{Binding}" />
             </Canvas.InputBindings>
             <Canvas.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Edit" Click="EditClicked" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Edit" Command="{StaticResource OREditCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Delete" Command="{StaticResource ORDeleteCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Add an AND below" Command="{StaticResource ANDAddCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Add an OR below" Command="{StaticResource ORAddCommand}" CommandParameter="{Binding}"/>
@@ -38,9 +31,11 @@
                 </ContextMenu>
             </Canvas.ContextMenu>
             <Line X1="50" Y1="-10" X2="50" Y2="0" Stroke="Black"/>
-            <Rectangle Height="65" Width="100" Fill="Beige" Stroke="Black"/>
+            <Border BorderThickness="1" BorderBrush="Black" CornerRadius="5,5,5,5" Background="RosyBrown">
+                <Rectangle Height="65" Width="100" Stroke="Transparent" StrokeThickness="0" />
+            </Border>
             <Line X1="50" Y1="65" X2="50" Y2="80" Stroke="Black"/>
-            <Path Name="ANDSymbol" Margin="0,15,0,0" Stroke="Black" Fill="Beige">
+            <Path Name="ANDSymbol" Margin="0,15,0,0" Stroke="Black" >
                 <Path.Data>
                     <PathGeometry>
                         <PathFigure StartPoint="25,85">
@@ -53,20 +48,62 @@
                         </PathFigure>
                     </PathGeometry>
                 </Path.Data>
+                <Path.Fill>
+                    <SolidColorBrush Color="RosyBrown" />
+                </Path.Fill>
+
             </Path>
-            <TextBlock Height="15" Width="100" Text="{Binding Path=Description}" TextAlignment="Center" />
+            <TextBlock Margin="3,2,0,0" Height="15" Width="95" Text="{Binding Path=Description}" TextAlignment="Center">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" >
+                        <Setter Property="Background" Value="Transparent" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=Description}" Value="No description" >
+                                <Setter Property="Background" Value="Yellow" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
             <TextBlock Margin="5,15,0,0" Height="15" Width="95" Text="{Binding Path=PFD,StringFormat='PFD: {0:E2}'}" TextAlignment="Center" />
             <StackPanel Margin="15,30,0,0" Orientation="Horizontal" Width="90" HorizontalAlignment="Center">
                 <TextBlock Height="15" Text="l" FontFamily="Symbol" />
                 <TextBlock Height="15" Text="{Binding Path=Lambda,StringFormat=': {0:E2}/hr'}"/>
             </StackPanel>
             <TextBlock Margin="5,45,0,0" Height="15" Width="95" Text="{Binding Path=MDT,StringFormat='MDT: {0:N0} hrs'}" TextAlignment="Center" />
-            <Rectangle Height="30" Width="90" Fill="Beige" Canvas.Left="5" Canvas.Top="85" Stroke="Black"/>
+            <Rectangle Height="30" Width="90" Canvas.Left="5" Canvas.Top="85" Stroke="Black">
+                <Rectangle.Fill>
+                    <LinearGradientBrush EndPoint="0.5,1.5" StartPoint="0.5,0">
+                        <GradientStop Color="RosyBrown" Offset="-0.10"/>
+                        <GradientStop Color="Beige" Offset="0.3"/>
+                        <GradientStop Color="RosyBrown" Offset="0.9"/>
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
             <Border Canvas.Left="5" Canvas.Top="85" Height="30" Width="90">
                 <TextBlock Text="{Binding Path=Name}" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"/>
             </Border>
             <Line X1="50" Y1="125" X2="50" Y2="135" Stroke="Black"/>
             <Line X1="{Binding X2}" Y1="135" X2="{Binding X3}" Y2="135" Stroke="Black"/>
+            <TextBlock Canvas.Left="-80" Canvas.Top="12">
+                <Run >PFD:</Run><Run Text="{Binding Path=SimulatedPFD,StringFormat=' {0:E2}', Mode=OneWay}"/>
+                <LineBreak />
+                <Run FontFamily="Symbol">l:</Run><Run Text="{Binding Path=SimulatedFailureRate,StringFormat=' {0:E2}', Mode=OneWay}"/> /hr
+                <LineBreak/>
+                <Run >MDT:</Run><Run Text="{Binding Path=SimulatedMeanDowntime,StringFormat=' {0:###,##0}', Mode=OneWay}"/> hrs
+                <LineBreak/>
+                <Run >Events:</Run><Run Text="{Binding Path=FailureCount,StringFormat=' {0:###,##0}', Mode=OneWay}"/>
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Hidden"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=DataContext.ShowSimulationResults, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="True" >
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
         </Canvas>
     </Grid>
 </UserControl>

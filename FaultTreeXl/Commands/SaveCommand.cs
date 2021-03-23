@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,6 +10,7 @@ using System.Xml.Serialization;
 
 namespace FaultTreeXl
 {
+    // Save the data under the current filename
     public class SaveCommand : ICommand
     {
         public event EventHandler CanExecuteChanged
@@ -28,23 +28,29 @@ namespace FaultTreeXl
         {
             try
             {
-                string fileName = "";
-                if (parameter is FaultTreeModel mc2)
+                if (parameter is FaultTreeModel faultTreeModel)
                 {
-                    fileName = mc2.Filename;
-                }
-                fileName = GetFileName(fileName);
-                if (!string.IsNullOrEmpty(fileName))
-                {
-                    if (parameter is FaultTreeModel mc)
+                    var fileName = faultTreeModel.Filename;
+                    if (!string.IsNullOrEmpty(fileName) && fileName != FaultTreeModel.NO_FILENAME)
                     {
-                        using (StreamWriter sw = new StreamWriter(path: fileName, append: false))
+                        using (StreamWriter streamWriter = new StreamWriter(path: fileName, append: false))
                         {
-                            XmlSerializer x = new XmlSerializer(mc.GetType());
-                            x.Serialize(sw, mc);
+                            XmlSerializer x = new XmlSerializer(faultTreeModel.GetType());
+                            x.Serialize(streamWriter, faultTreeModel);
                         }
-                        mc.Status = $"Fault Tree saved to file: {fileName}";
-                        mc.Filename = fileName;
+                        faultTreeModel.Status = $"Fault Tree saved to file: {fileName}";
+                        faultTreeModel.Dirty = false;
+                        MessageBox.Show($"Saved to {fileName}", "Saved File");
+                    }
+                    else
+                    {
+                        var response = MessageBox.Show("Filename is blank, do you want to SaveAs?", "Saving", MessageBoxButton.YesNo);
+                        if (response == MessageBoxResult.Yes)
+                        {
+                            ICommand saveAsCommand = new SaveAsCommand();
+                            saveAsCommand.Execute(faultTreeModel);
+                            faultTreeModel.Dirty = false;
+                        }
                     }
                 }
             }
@@ -53,36 +59,6 @@ namespace FaultTreeXl
                 MessageBox.Show(e.Message);
             }
         }
-
-        private string GetFileName(string currentFilename)
-        {
-            string initialFolder = "";
-            string stripFilename = "";
-            string desktopFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            try
-            {
-                initialFolder = Path.GetDirectoryName(currentFilename);
-                stripFilename = Path.GetFileName(currentFilename);
-            }
-            catch
-            {
-                initialFolder = desktopFolder;
-                stripFilename = "new Fault Tree.fta";
-            }
-            SaveFileDialog fileDialog = new SaveFileDialog()
-            {
-                InitialDirectory = initialFolder,
-                DefaultExt = ".fta",
-                Filter = "Fault Tree documents (.fta)|*.fta",
-                CheckFileExists = false,
-                CheckPathExists = true,
-                FileName = stripFilename,
-            };
-            if (fileDialog.ShowDialog() == true)
-            {
-                return fileDialog.FileName;
-            }
-            return null;
-        }
     }
+
 }

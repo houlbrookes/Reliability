@@ -23,5 +23,17 @@ namespace FaultTreeXl
         {
             InitializeComponent();
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (DataContext is GraphicItem theGrapichItem)
+            {
+                if (! string.IsNullOrEmpty(theGrapichItem.Error))
+                {
+                    var result = MessageBox.Show("Please correct or hit cancel to ignore", "There are errors with the data", MessageBoxButton.OKCancel);
+                    e.Cancel = result == MessageBoxResult.OK;
+                }
+            }
+        }
     }
 }

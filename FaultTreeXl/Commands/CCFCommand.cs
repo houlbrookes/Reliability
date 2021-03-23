@@ -22,6 +22,7 @@ namespace FaultTreeXl
                 theWindow.Model = (Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel);
                 theWindow.Node = node;
                 theWindow.ShowDialog();
+                theWindow.Model.ReDrawRootNode();
             }
         }
     }

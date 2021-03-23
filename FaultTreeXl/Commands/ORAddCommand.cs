@@ -26,10 +26,7 @@ namespace FaultTreeXl
                 var newNode = new OR()
                 {
                     Name = $"OR {ftm.NextNodeName("OR") + 1}",
-                    Nodes = new ObservableCollection<GraphicItem> {
-                        //new Node{ Name = $"Node {ftm.NextNodeName("Node") + 1}", Lambda=1E-6M, PTI=8760},
-                        //new Node{ Name = $"Node {ftm.NextNodeName("Node") + 2}", Lambda=1E-6M, PTI=8760}
-                    }
+                    Nodes = new ObservableCollection<GraphicItem>()
                 };
                 theGraphic.Nodes.Add(newNode);
                 (Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel).ReDrawRootNode();

@@ -1,47 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace FaultTreeXl
 {
-    /// <summary>
-    /// Interaction logic for CCFWindow.xaml
-    /// </summary>
-    public partial class CCFWindow : Window
-    {
-        public FaultTreeModel Model { get; set; }
-        public Node Node { get; set; }
-
-        public CCFWindow()
-        {
-            InitializeComponent();
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            (DataContext as CCFWindowController).Model = Model;
-            (DataContext as CCFWindowController).Nodes = Model.FaultTree;
-            (DataContext as CCFWindowController).Node2Update = Node;
-        }
-    }
-
     public class CCFWindowController : NotifyPropertyChangedItem
     {
         private FaultTreeModel _Model = null;
@@ -55,18 +21,34 @@ namespace FaultTreeXl
             }
         }
 
-        private double _CCFRate = 0.1;
+        private double _CCFRate = 0.10;
         public double CCFRate { get => _CCFRate; set => Changed(ref _CCFRate, value); }
 
-        private ObservableCollection<GraphicItem> _Nodes = null;
+        private ObservableCollection<GraphicItem> _Nodes = new ObservableCollection<GraphicItem>();
         public ObservableCollection<GraphicItem> Nodes
         {
             get => _Nodes;
-            set => Changed(ref _Nodes, value);
+            set 
+            { 
+                Changed(ref _Nodes, value);
+                CollectionViewSource.GetDefaultView(_Nodes).Filter = listItem => NodesOnly ? (listItem is Node) : true;
+            }
         }
 
         private bool _UpdateSource = true;
         public bool UpdateSource { get => _UpdateSource; set => Changed(ref _UpdateSource, value); }
+
+        private bool _NodesOnly = true;
+        public bool NodesOnly 
+        { 
+            get => _NodesOnly;
+            set
+            { 
+                Changed(ref _NodesOnly, value);
+                if (_Nodes != null)
+                    CollectionViewSource.GetDefaultView(_Nodes).Refresh();
+            }
+        }
 
         public Node Node2Update { get; set; }
 
@@ -76,7 +58,7 @@ namespace FaultTreeXl
         /// <summary>
         /// Update the Selected Node with a CCF value from the Target Node
         /// </summary>
-        public ICommand UpdateCommand { get; set; } = new GenericCommand<CCFWindowController>
+        public ICommand UpdateCommand { get; set; } = new GenericCommand<object[]>
         {
             CanExecuteProxy = x => true,
             ExecuteProxy = Update,
@@ -88,16 +70,19 @@ namespace FaultTreeXl
         /// by removing this amount of failure rate
         /// </summary>
         /// <param name="param"></param>
-        private static void Update(CCFWindowController param)
+        private static void Update(object[] parameters)
         {
             try
             {
-                if (param.Node2UpdateFrom != null)
+                if ((parameters[0] is CCFWindowController controller) && (parameters[1] is ListView listView))
                 {
-                    param.Node2Update.Lambda = param.Node2UpdateFrom.Lambda * (decimal)param.CCFRate;
-                    if (param.UpdateSource)
+                    foreach(GraphicItem item in listView.SelectedItems)
                     {
-                        param.Node2UpdateFrom.Lambda = param.Node2UpdateFrom.Lambda * (decimal)(1 - param.CCFRate);
+                        controller.Node2Update.Lambda = item.BetaFreeLambda * (decimal)controller.CCFRate;
+                        if (controller.UpdateSource)
+                        {
+                            item.Beta = controller.CCFRate * 100;
+                        }
                     }
                 }
             }
@@ -105,6 +90,8 @@ namespace FaultTreeXl
             {
                 MessageBox.Show(e.Message, "Error");
             }
+            if (parameters[2] is Window theWindow)
+                theWindow.Close();
         }
 
         public CCFWindowController()

@@ -27,7 +27,7 @@ namespace FaultTreeXl
 
         private void EditClicked(object sender, RoutedEventArgs e)
         {
-            var commandToExecute = new OREditCommand();
+            var commandToExecute = new EditCommand();
             var node = DataContext;
             var theWindow = Window.GetWindow(this);
             commandToExecute.Execute(new object[] { node, theWindow });

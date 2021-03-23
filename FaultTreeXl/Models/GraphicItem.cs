@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -19,7 +20,7 @@ namespace FaultTreeXl
     [XmlInclude(typeof(OR))]
     [XmlInclude(typeof(AND))]
     [XmlInclude(typeof(Node))]
-    public partial class  GraphicItem : NotifyPropertyChangedItem
+    public partial class GraphicItem : NotifyPropertyChangedItem
     {
         public event EventHandler Recalculating;
         public event EventHandler CalculationsComplete;
@@ -64,7 +65,22 @@ namespace FaultTreeXl
 
         private string name = "Node";
         [XmlAttribute]
-        public string Name { get => name; set => Changed(ref name, value); }
+        public string Name
+        {
+            get => name;
+            set
+            {
+                Changed(ref name, value);
+                Notify("IsCCF");
+            }
+        }
+
+        [XmlIgnore]
+        public bool IsCCF
+        {
+            get => this.Name.Contains("CCF");
+        }
+
 
         private string description = "No description";
         [XmlAttribute]
@@ -83,7 +99,10 @@ namespace FaultTreeXl
         /// (Work is done in CutSet extension class)
         /// </summary>
         [XmlIgnore]
-        public string CutSetsAsString { get => CutSets.AsString();  }
+        public string CutSetsAsString { get => CutSets.AsString(); }
+
+        private double beta = 0.0;
+        public double Beta { get => beta; set => Changed(ref beta, value); }
 
         private decimal lambda = 0;
         /// <summary>
@@ -92,15 +111,28 @@ namespace FaultTreeXl
         [XmlAttribute]
         virtual public decimal Lambda
         {
-            get => lambda;
+            get => lambda * ((decimal)(1.0 - Beta / 100));
             set
             {
-                Changed(ref lambda, value);
+                if (Beta > 0)
+                {
+                    Changed(ref lambda, value / ((decimal)(1.0 - Beta / 100)));
+                }
+                else
+                {
+                    Changed(ref lambda, value);
+                }
+
                 Notify("PFD");
                 Parent?.Recalculating?.Invoke(this, EventArgs.Empty);
                 UpdateParent();
                 CalculationsComplete?.Invoke(this, EventArgs.Empty);
             }
+        }
+        public decimal BetaFreeLambda
+        {
+            get => lambda;
+            set => Changed(ref lambda, value, "Lambda");
         }
 
         private decimal _pTI = 8760;
@@ -124,7 +156,7 @@ namespace FaultTreeXl
         /// Uses the simple forumla of PFD/Failure Rate
         /// </summary>
         [XmlAttribute]
-        virtual public decimal MDT { get => Lambda>0 ? PFD / Lambda : 0; }
+        virtual public decimal MDT { get => Lambda > 0 ? PFD / Lambda : 0; }
 
         private decimal? _proofTestEffectiveness = 1;
         [XmlElement(IsNullable = true)]
@@ -133,6 +165,9 @@ namespace FaultTreeXl
         private decimal? _lifeTime = 8760 * 10;
         [XmlElement(IsNullable = true)]
         public decimal? LifeTime { get => _lifeTime; set => Changed(ref _lifeTime, value); }
+
+        [XmlIgnore]
+        public virtual string NodeType { get => "GraphicItem"; }
 
         /// <summary>
         /// Probability of Failure on Demand
@@ -146,7 +181,8 @@ namespace FaultTreeXl
         public decimal PFD
         {
             // calculated from the cutsets of the OR/AND/Node
-            get => 1M - CutSets.Select(cs => (1-cs.PFD)).Product();
+            //get => 1M - CutSets.Select(cs => (1-cs.PFD)).Product();
+            get => CutSets.Sum(cs => cs.PFD);
         }
 
         private bool _forceIntegration = false;
@@ -174,7 +210,7 @@ namespace FaultTreeXl
     /// <summary>
     /// Graphical elements of the Graphic Item
     /// </summary>
-    public partial class GraphicItem 
+    public partial class GraphicItem
     {
         public const double GRAPHIC_HEIGHT = 145;
         public const double GRAPHIC_WIDTH = 110;
@@ -193,7 +229,12 @@ namespace FaultTreeXl
         /// </summary>
         [XmlIgnore]
         public Microsoft.Office.Interop.Visio.Shape BodyShape { get; set; }
-
+        /// <summary>
+        /// Assign the X,Y values to each node
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <returns></returns>
         virtual public double AssignXY(double x1, double y1)
         {
             double newX = x1;
@@ -217,8 +258,9 @@ namespace FaultTreeXl
             }
 
             if (Nodes.Count > 0)
-            {// Parent
-                //this.X = x1 + (newX - x1) / 2 - 110 / 2;
+            {   // this is a parent node
+                // Centre the item within its children
+                // and set up the X2/3 for the connecting line
                 X = (nodeArray[0].X + nodeArray[nodeArray.Length - 1].X) / 2;
                 this.Y = y1;
 
@@ -227,13 +269,18 @@ namespace FaultTreeXl
                 return Math.Max(newX, GRAPHIC_WIDTH);
             }
             else
-            {//Node
+            {   // this is a Node (leaf)
+                // leave the item where it is (newX, y1)
                 this.X = newX;
                 this.Y = y1;
                 return newX + GRAPHIC_WIDTH;
             }
 
         }
+
+        [XmlIgnore]
+        // used for displaying the tree
+        public double Mod = 0;
 
         /// <summary>
         /// Top Left Hand Corner
@@ -253,24 +300,25 @@ namespace FaultTreeXl
         private double x3 = 0D;
         [XmlIgnore] public double X3 { get => x3; set => Changed(ref x3, value); }
 
-        private bool isSelected = false;
-        [XmlIgnore] public bool IsSelected
-        {
-            get => isSelected;
-            set
-            {
-                if (value)
-                {
-                    var topNode = this;
-                    while (topNode.Parent != null)
-                        topNode = topNode.Parent;
-                    topNode.ClearSelection();
-                }
-                Changed(ref isSelected, value);
-            }
-        }
+        //private bool isSelected = false;
+        //[XmlIgnore]
+        //public bool IsSelected
+        //{
+        //    get => isSelected;
+        //    set
+        //    {
+        //        if (value)
+        //        {
+        //            var topNode = this;
+        //            while (topNode.Parent != null)
+        //                topNode = topNode.Parent;
+        //            topNode.ClearSelection();
+        //        }
+        //        Changed(ref isSelected, value);
+        //    }
+        //}
 
-        private bool _showLifeInfo = true;
+        private bool _showLifeInfo = false;
         [XmlIgnore]
         public bool ShowLifeInfo
         {
@@ -279,12 +327,247 @@ namespace FaultTreeXl
         }
 
 
-        private void ClearSelection()
+        //private void ClearSelection()
+        //{
+        //    IsSelected = false;
+        //    foreach (var subNode in Nodes)
+        //        subNode.ClearSelection();
+        //}
+
+    }
+
+    /// <summary>
+    /// Extension to capture discrete simulation
+    /// </summary>
+    public partial class GraphicItem : NotifyPropertyChangedItem, IDataErrorInfo
+    {
+        [XmlIgnore]
+        public SimulationState CurrentState = SimulationState.Working;
+        [XmlIgnore]
+        public double LastEvent = 0D;
+        private long _failureCount = 0;
+        [XmlIgnore]
+        public long FailureCount { get => _failureCount; set => Changed(ref _failureCount, value, updateDirty: false); }
+        private long _repairCount = 0;
+        [XmlIgnore]
+        public long RepairCount { get => _repairCount; set => Changed(ref _repairCount, value, updateDirty: false); }
+        [XmlIgnore]
+        public double Downtime = 0D;
+        [XmlIgnore]
+        public double Uptime = 0D;
+
+        private double _nextEvent = 0D;
+        [XmlIgnore]
+        public double NextEvent { get => _nextEvent; set => Changed(ref _nextEvent, value); }
+
+        [XmlIgnore]
+        public double SimulatedPFD
         {
-            IsSelected = false;
-            foreach (var subNode in Nodes)
-                subNode.ClearSelection();
+            get
+            {
+                if (Uptime + Downtime > 0D)
+                    return Downtime / (Uptime + Downtime);
+                else
+                    return 0D;
+            }
+        }
+        [XmlIgnore]
+        public double SimulatedFailureRate
+        {
+            get
+            {
+                if ((Uptime + Downtime) > 0D)
+                    return FailureCount / (Uptime + Downtime);
+                else
+                    return 0D;
+            }
+        }
+        [XmlIgnore]
+        public double SimulatedMeanDowntime
+        {
+            get
+            {
+                if (FailureCount > 0)
+                    return Downtime / FailureCount;
+                else
+                    return 0D;
+            }
         }
 
+        public string Error => Errors.Count > 0 ? Errors.First().Value : string.Empty;
+
+        private Dictionary<string, string> Errors = new Dictionary<string, string>();
+        private string SetError(string fieldName, string errorString)
+        {
+            Errors[fieldName] = errorString;
+            return errorString;
+        }
+        private void ClearError(string fieldName)
+        {
+            if (Errors.ContainsKey(fieldName)) Errors.Remove(fieldName);
+        }
+        public string this[string columnName]
+        {
+            get
+            {
+                string result = null;
+                if (columnName == nameof(this.Name))
+                {
+                    if (string.IsNullOrWhiteSpace(Name))
+                    {
+                        result = SetError(nameof(Name), "Please enter a value for this field");
+                    }
+                    else
+                    {
+                        ClearError(nameof(Name));
+                    }
+                }
+                if (columnName == nameof(BetaFreeLambda))
+                {
+                    if (BetaFreeLambda < 0 || BetaFreeLambda > 0.01M)
+                    {
+                        result = SetError(nameof(BetaFreeLambda), "Please enter a value for Lambda between 0 and 0.01");
+                    }
+                    else
+                    {
+                        ClearError(nameof(BetaFreeLambda));
+                    }
+                }
+                if (columnName == nameof(Beta))
+                {
+                    if (Beta < 0 || Beta > 100)
+                    {
+                        result = SetError(nameof(Beta), "Please enter a value for Beta between 0 and 100");
+                    }
+                    else
+                    {
+                        ClearError(nameof(Beta));
+                    }
+                }
+                if (columnName == nameof(ProofTestEffectiveness))
+                {
+                    if (ProofTestEffectiveness.HasValue)
+                    {
+                        if (ProofTestEffectiveness < 0M || ProofTestEffectiveness > 1M)
+                        {
+                            result = SetError(nameof(ProofTestEffectiveness), "Please enter a value for Proof Test Effectiveness between 0 and 1");
+                        }
+                        else
+                        {
+                            ClearError(nameof(ProofTestEffectiveness));
+                        }
+                    }
+                    else
+                    {
+                        result = SetError(nameof(ProofTestEffectiveness), "Please enter a value for Proof Test Effectiveness between 0 and 1");
+                    }
+                }
+                if (columnName == nameof(PTI))
+                {
+                    if (PTI < 4 || PTI > LifeTime)
+                    {
+                        result = SetError(nameof(PTI), "Please enter a value for PTI between 4hrs and the Lifetime");
+                    }
+                    else
+                    {
+                        ClearError(nameof(PTI));
+                    }
+                }
+                if (columnName == nameof(LifeTime))
+                {
+                    if (LifeTime < PTI || LifeTime > 20 * 8760)
+                    {
+                        result = SetError(nameof(LifeTime), "Please enter a value for Lifetime between PTI and 20 years");
+                    }
+                    else
+                    {
+                        ClearError(nameof(LifeTime));
+                    }
+                }
+                return result;
+            }
+        }
+
+        public double CalculateNextEvent(double currentClock, Random uniformRandomValue)
+        {
+            double result = 0D;
+            double doubleLambda = (double)-this.Lambda;
+            double doubleMDT = -1D / (double)MDT;
+            if (CurrentState == SimulationState.Working)
+            {
+                // Time of next breakdown
+                result = Math.Log(1 - uniformRandomValue.NextDouble()) / doubleLambda;
+            }
+            else
+            {
+                // Time of next restoration to Working
+                if (this.ProofTestEffectiveness == 1M)
+                {
+                    var interval = (double)PTI;
+                    result = interval + Math.Floor(currentClock / interval) * interval - currentClock;
+                }
+                else
+                {
+                    // Imperfect proof-testing
+                    // Generate two possible events and choose the smallest
+                    if (uniformRandomValue.NextDouble() > (double)ProofTestEffectiveness)
+                    {
+                        // This is a lifetime event
+                        var interval = (double)LifeTime;
+                        result = interval + Math.Floor(currentClock / interval) * interval - currentClock;
+                    }
+                    else
+                    {
+                        // This is proof test event
+                        var interval = (double)PTI;
+                        result = interval + Math.Floor(currentClock / interval) * interval - currentClock;
+                    }
+                }
+            }
+
+            NextEvent = currentClock + result;
+            return NextEvent;
+        }
+
+        public virtual SimulationState CalculateState(double currentClock)
+        {
+            SimulationState result = SimulationState.Broken;
+            var timeElapsed = currentClock - LastEvent;
+
+            if (_nextEvent <= currentClock)
+            {
+                if (CurrentState == SimulationState.Working)
+                {
+                    // A Breakdown/failure has occured
+                    Uptime += timeElapsed;
+                    FailureCount += 1;
+                    CurrentState = SimulationState.Broken;
+                    result = CurrentState;
+
+                }
+                else
+                {
+                    // A Repair has resore the system to Working
+                    Downtime += timeElapsed;
+                    RepairCount += 1;
+                    CurrentState = SimulationState.Working;
+                    result = CurrentState;
+                }
+            }
+
+            LastEvent = currentClock;
+
+            Notify(nameof(this.SimulatedFailureRate));
+            Notify(nameof(this.SimulatedPFD));
+            Notify(nameof(this.SimulatedMeanDowntime));
+
+            Parent.CalculateState(currentClock);
+
+            return result;
+        }
+    }
+    public enum SimulationState
+    {
+        Working, Broken
     }
 }

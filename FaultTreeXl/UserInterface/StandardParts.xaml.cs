@@ -28,31 +28,31 @@ namespace FaultTreeXl
             InitializeComponent();
         }
 
-        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is ListView thisListView)
-            {
-                var selected = thisListView.SelectedItem;
-                if (selected is GraphicItem node)
-                {
-                    foreach (var item in thisListView.ItemsSource)
-                    {
-                        if (item is GraphicItem listNode)
-                        {
-                            if (listNode == selected)
-                            {
-                                listNode.IsSelected = true;
-                                SelectedNode = listNode;
-                            }
-                            else
-                            {
-                                listNode.IsSelected = false;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //{
+        //    if (sender is ListView thisListView)
+        //    {
+        //        var selected = thisListView.SelectedItem;
+        //        if (selected is GraphicItem node)
+        //        {
+        //            foreach (var item in thisListView.ItemsSource)
+        //            {
+        //                if (item is GraphicItem listNode)
+        //                {
+        //                    if (listNode == selected)
+        //                    {
+        //                        listNode.IsSelected = true;
+        //                        SelectedNode = listNode;
+        //                    }
+        //                    else
+        //                    {
+        //                        listNode.IsSelected = false;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {

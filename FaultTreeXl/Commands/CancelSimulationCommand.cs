@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Windows;
 using System.Windows.Input;
 
 namespace FaultTreeXl
 {
-    class DummyCommand : ICommand
+    class CancelSimulationCommand : ICommand
     {
         public event EventHandler CanExecuteChanged
         {
@@ -16,10 +15,12 @@ namespace FaultTreeXl
 
         public void Execute(object parameter)
         {
-            if (parameter is string prompt)
-                MessageBox.Show(prompt);
+            if (parameter is FaultTreeModel model)
+            {
+                model.simulationProcess?.CancelAsync();
+            }
         }
-    }
 
+    }
 
 }

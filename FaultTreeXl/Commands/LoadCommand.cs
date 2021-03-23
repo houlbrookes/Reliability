@@ -31,6 +31,7 @@ namespace FaultTreeXl
                 mc.RootNode = data.RootNode;
                 mc.ReDrawRootNode();
                 mc.ShowingCutsets = false;
+                mc.Dirty = false;
             }
         }
 

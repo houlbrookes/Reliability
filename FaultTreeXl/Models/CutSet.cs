@@ -66,6 +66,7 @@ namespace FaultTreeXl
                 numberOfPartitions: INTEGRATION_PARTITIONS) 
                         / missionTime);
         }
+        public bool UsedIntegration { get; set; } = false;
         public decimal PFD
         {
             get
@@ -87,11 +88,13 @@ namespace FaultTreeXl
                         {
                             // use simple calcs
                             result = (nodes.Product(g => g.Lambda * g.PTI) / (nodes.Count + 1));
+                            UsedIntegration = false;
                         }
                         else
                         {
                             // use integration
                             result = nodes.PDFbyIntegration((double)maxMissionTime);
+                            UsedIntegration = true;
                         }
                     }
                     if (diagnosed.Count()>0)
@@ -107,6 +110,62 @@ namespace FaultTreeXl
                 }
                 return result;
             }
+        }
+
+        public (decimal, decimal) PFDFactor()
+        {
+            var result = (1.0M, 1.0M);
+            var nodeQty = (decimal)Count;
+            var minPTI = this.Min(n => n.PTI);
+            var maxPTI = this.Max(n => n.PTI);
+            var noOfmaxPTI = this.Count(n => n.PTI == maxPTI);
+            var ratioOfPTI = maxPTI / minPTI;
+
+            if (this.Any(n => minPTI != n.PTI && maxPTI != n.PTI))
+            {
+                // Cannot handle this calc at the moment
+            }
+            else if (minPTI == maxPTI)
+            {
+                // all nodes with the same PTI
+                return (1.0M/(nodeQty + 1M), 1M);
+            }
+            else if (nodeQty == 2 )
+            {
+                // 1oo2 mixed PTI
+                // (3n+1)/12
+                return ((3.0M * ratioOfPTI + 1.0M) / 12.0M, (ratioOfPTI + 1.0M)/2);
+            }
+            else if (nodeQty == 3 && noOfmaxPTI == 1)
+            {
+                // 1oo3 mixed PTI only one maxPTI/Life
+                return ((2.0M * ratioOfPTI + 1.0M) / 12.0M, (ratioOfPTI + 1.0M) / 2);
+            }
+            else if (nodeQty == 3 && noOfmaxPTI == 2)
+            {
+                // 1oo3 mixed PTI 2 maxPTI/Life
+                return (ratioOfPTI * (2.0M * ratioOfPTI + 1.0M) / 12.0M, (ratioOfPTI + 1)*(2*ratioOfPTI + 1.0M) / 6);
+            }
+            else if (nodeQty == 4 && noOfmaxPTI == 1)
+            {
+                // 1oo3 mixed PTI 
+                return ((5.0M * ratioOfPTI + 3.0M) / 40.0M, (ratioOfPTI + 1.0M) / 2);
+            }
+            else if (nodeQty == 4 && noOfmaxPTI == 2)
+            {
+                // 1oo4 mixed PTI
+                return ((20 * ratioOfPTI * ratioOfPTI + 15.0M * ratioOfPTI + 1.0M) / 180.0M, (ratioOfPTI + 1) * (2 * ratioOfPTI + 1.0M) / 6);
+            }
+            else if (nodeQty == 4 && noOfmaxPTI == 3)
+            {
+                // 1oo4 mixed PTI
+                return ((15 * ratioOfPTI * ratioOfPTI * ratioOfPTI + 10 * ratioOfPTI * ratioOfPTI - 1.0M) / 120.0M, ratioOfPTI * (ratioOfPTI + 1.0M) * (ratioOfPTI + 1.0M) / 4);
+            }
+            else
+            {
+                // two many nodes for current calculations
+            }
+            return result;
         }
 
         public decimal MDT { get => PFD / Lambda; }

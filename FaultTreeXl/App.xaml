@@ -9,8 +9,10 @@
         <local:AND x:Key="GlobalAND" />
         <local:Node x:Key="GlobalNode" />
 
-        <local:OREditCommand x:Key="OREditCommand"     />
-        <local:ORDeleteCommand x:Key="ORDeleteCommand"     />
+        <local:OREdit x:Key="OrEditWindow" />
+
+        <local:EditCommand x:Key="OREditCommand"     />
+        <local:DeleteCommand x:Key="ORDeleteCommand"     />
         <local:NodeAddCommand x:Key="NodeAddCommand"     />
         <local:DiagnosedFaultAddCommand x:Key="DiagnosedFaultAddCommand"     />
         <local:ORAddCommand x:Key="ORAddCommand"     />
@@ -27,22 +29,26 @@
         <local:Life15YearsCommand x:Key="Life15Years"     />
         <local:Life20YearsCommand x:Key="Life20Years"     />
         <local:RecalcCommand x:Key="RecalcCommand"     />
-        <local:SelectCommand x:Key="SelectCommand"     />
+        <!--<local:SelectCommand x:Key="SelectCommand"     />-->
         <local:ToggleLifeCommand x:Key="ToggleShowLifeCommand"     />
-        <local:ChoosePartCommand x:Key="ChoosePartCommand"     />
+        <!--<local:ChoosePartCommand x:Key="ChoosePartCommand"     />-->
         <local:UpdateNodeFromStandardCommand x:Key="UpdateNodeFromStandardCommand"     />
-        <local:CalcCCFCommand x:Key="CalcCCFCommand"     />
+        <!--<local:CalcCCFCommand x:Key="CalcCCFCommand"     />-->
         <local:ApplyCCFCommand x:Key="ApplyCCFCommand" />
         <local:ToggleForceIntegrationCommand x:Key="ToggleForceIntegrationCommand" />
-        <local:GetFailRateCommand x:Key="GetFailRateCommand" />
+        <!--<local:GetFailRateCommand x:Key="GetFailRateCommand" />-->
         <local:ShowCutSetsCommand x:Key="ShowCutSetsCommand" />
         <local:CCFCommand x:Key="CCFCommand" />
         <local:ShowCalcsCommand x:Key="ShowCalcsCommand" />
+        <local:ShowSimpleCalcsCommand x:Key="ShowSimpleCalcsCommand" />
 
         <local:DummyCommand x:Key="DummyCommand"     />
 
         <local:MultiBindingConverter x:Key="MultiBindingConverter" />
 
-        <local:StandardComponents x:Key="GlobalParts" />
+        <!--<local:StandardComponents x:Key="GlobalParts" />-->
+
+        <local:RunSimulationCommand x:Key="RunSimulationCommand" />
+        <local:CancelSimulationCommand x:Key="CancelSimulationCommand" />
     </Application.Resources>
 </Application>

@@ -12,8 +12,10 @@ namespace FaultTreeXl
 {
 
 
-    public class AND : GraphicItem
+    public partial class AND : GraphicItem
     {
+        public override string NodeType => "AND";
+
         [XmlIgnore]
         public override List<CutSet> CutSets
         {
@@ -52,4 +54,47 @@ namespace FaultTreeXl
         }
 
     }
+
+    public partial class AND
+    {
+        public override SimulationState CalculateState(double currentClock)
+        {
+            SimulationState result = CurrentState;
+            var timeElapsed = currentClock - LastEvent;
+
+            var isWorking = Nodes.Any(n => n.CurrentState == SimulationState.Working);
+            if (!isWorking && CurrentState == SimulationState.Working)
+            {
+                // Just failied
+                CurrentState = SimulationState.Broken;
+                Uptime += timeElapsed;
+                FailureCount += 1;
+                result = CurrentState;
+                LastEvent = currentClock;
+
+            }
+            else if (isWorking && CurrentState == SimulationState.Broken)
+            {
+                // Just repaired
+                CurrentState = SimulationState.Working;
+                Downtime += timeElapsed;
+                RepairCount += 1;
+                result = CurrentState;
+                LastEvent = currentClock;
+            }
+            else
+            {
+                result = CurrentState;
+            }
+
+            Notify(nameof(this.SimulatedFailureRate));
+            Notify(nameof(this.SimulatedPFD));
+            Notify(nameof(this.SimulatedMeanDowntime));
+
+            Parent?.CalculateState(currentClock);
+
+            return result;
+        }
+    }
+
 }

@@ -20,6 +20,10 @@ namespace FaultTreeXl
     /// </summary>
     public partial class MainWindow : Window
     {
+        Point? lastCenterPositionOnTarget;
+        Point? lastMousePositionOnTarget;
+        Point? lastDragPoint;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -32,14 +36,17 @@ namespace FaultTreeXl
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            MessageBoxResult reply = MessageBox.Show("Do you want to close (y/n)", "Exit", MessageBoxButton.YesNo);
-            if (reply == MessageBoxResult.Yes)
+            if (DataContext is FaultTreeModel ftModel)
             {
-                e.Cancel = false;
-            }
-            else
-            {
-                e.Cancel = true;
+                if (ftModel.Dirty)
+                {
+                    MessageBoxResult reply = MessageBox.Show("Do you want to save before closing (y/n)", "Unsaved Edits", MessageBoxButton.YesNo);
+                    if (reply == MessageBoxResult.Yes)
+                    {
+                        var saveCommand = new SaveCommand();
+                        saveCommand.Execute(ftModel);
+                    }
+                }
             }
         }
 

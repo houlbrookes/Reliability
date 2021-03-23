@@ -61,14 +61,14 @@ namespace FaultTreeXl
             for (var i = 0; i < max_cutset_length; i++)
             {
                 var node_col = i * 2 + 1;
-                theWorkSheet.Cells[2, node_col] = $"Node {i+1}";
+                theWorkSheet.Cells[2, node_col] = $"Node {i + 1}";
                 theWorkSheet.Cells[2, node_col].Font.Bold = true;
                 theWorkSheet.Cells[2, node_col].HorizontalAlignment = XlHAlign.xlHAlignCenter;
                 GetRange(2, node_col, 2, node_col + 1).MergeCells = true;
 
                 theWorkSheet.Cells[3, node_col + 0] = $"ID";
                 theWorkSheet.Cells[3, node_col + 0].Font.Bold = true;
-                theWorkSheet.Cells[3, node_col + 1] = $"λDU{i+1}";
+                theWorkSheet.Cells[3, node_col + 1] = $"λDU{i + 1}";
                 theWorkSheet.Cells[3, node_col + 1].Characters[2, 3].Font.Subscript = true;
                 theWorkSheet.Cells[3, node_col + 1].Font.Bold = true;
                 theWorkSheet.Cells[3, node_col + 1].HorizontalAlignment = XlHAlign.xlHAlignCenter;
@@ -103,7 +103,9 @@ namespace FaultTreeXl
                 var node_index = 0;
                 var node_qty = cs.Nodes.Count;
                 // Put the highest PTI in the first column
+                var min_pti = cs.Min(n => n.PTI);
                 var max_pti = cs.Max(n => n.PTI);
+                var no_of_min_ptis = cs.Count(n => n.PTI == min_pti);
                 var prodString = "";
                 foreach (var n in cs)
                 {
@@ -116,26 +118,35 @@ namespace FaultTreeXl
                     node_index += 1;
                 }
 
-                theWorkSheet.Cells[row, pti_col] = max_pti;
+                theWorkSheet.Cells[row, pti_col] = min_pti;
                 theWorkSheet.Cells[row, pti_col].NumberFormat = @"#,###,##0";
-                theWorkSheet.Cells[row, pfd_col] = $"={addr(row, pti_col)}^{node_qty}*Product({prodString})/{node_qty + 1}";
+
+                (var pfdFactor, var lambdaFactor) = cs.PFDFactor();
+
+                theWorkSheet.Cells[row, pfd_col] = $"={addr(row, pti_col)}^{node_qty}*Product({prodString})*{pfdFactor}";
                 theWorkSheet.Cells[row, pfd_col].NumberFormat = "0.00E+00";
-                theWorkSheet.Cells[row, frate_col] = $"={addr(row, pti_col)}^{node_qty-1}*Product({prodString})";
+                theWorkSheet.Cells[row, frate_col] = $"={addr(row, pti_col)}^{node_qty - 1}*Product({prodString})*{lambdaFactor}";
                 theWorkSheet.Cells[row, frate_col].NumberFormat = "0.00E+00";
+                theWorkSheet.Cells[row, frate_col + 1] = $"={pfdFactor}";
+                theWorkSheet.Cells[row, frate_col + 2] = $"={lambdaFactor}";
+                theWorkSheet.Cells[row, frate_col + 3] = $"={cs.PFD}";
+                theWorkSheet.Cells[row, frate_col + 3].NumberFormat = "0.00E+00";
+                theWorkSheet.Cells[row, frate_col + 4] = $"={cs.Lambda}";
+                theWorkSheet.Cells[row, frate_col + 4].NumberFormat = "0.00E+00";
+                theWorkSheet.Cells[row, frate_col + 5] = $"={cs.UsedIntegration}";
+
+                theWorkSheet.Cells[row + 1, pfd_col - 1] = "Total=";
+                theWorkSheet.Cells[row + 1, pfd_col - 1].Font.Bold = true;
+                theWorkSheet.Cells[row + 1, pfd_col - 1].HorizontalAlignment = XlHAlign.xlHAlignRight;
+
+                theWorkSheet.Cells[row + 1, pfd_col] = $"=Sum({addr(4, pfd_col)}:{addr(row, pfd_col)})";
+                theWorkSheet.Cells[row + 1, pfd_col].Font.Bold = true;
+                theWorkSheet.Cells[row + 1, pfd_col].NumberFormat = "0.00E+00";
+
+                theWorkSheet.Cells[row + 1, pfd_col + 1] = $"=Sum({addr(4, frate_col)}:{addr(row, frate_col)})";
+                theWorkSheet.Cells[row + 1, pfd_col + 1].Font.Bold = true;
+                theWorkSheet.Cells[row + 1, pfd_col + 1].NumberFormat = "0.00E+00";
             }
-
-            theWorkSheet.Cells[row + 1, pfd_col-1] = "Total=";
-            theWorkSheet.Cells[row + 1, pfd_col-1].Font.Bold = true;
-            theWorkSheet.Cells[row + 1, pfd_col-1].HorizontalAlignment = XlHAlign.xlHAlignRight;
-
-            theWorkSheet.Cells[row + 1, pfd_col] = $"=Sum({addr(4, pfd_col)}:{addr(row, pfd_col)})";
-            theWorkSheet.Cells[row + 1, pfd_col].Font.Bold = true;
-            theWorkSheet.Cells[row + 1, pfd_col].NumberFormat = "0.00E+00";
-
-            theWorkSheet.Cells[row + 1, pfd_col + 1] = $"=Sum({addr(4, frate_col)}:{addr(row, frate_col)})";
-            theWorkSheet.Cells[row + 1, pfd_col + 1].Font.Bold = true;
-            theWorkSheet.Cells[row + 1, pfd_col + 1].NumberFormat = "0.00E+00";
-
             row += 2;
             GetRange(row, 1, row, 4).MergeCells = true;
             theWorkSheet.Cells[row, 1] = "List of Nodes";
@@ -153,17 +164,69 @@ namespace FaultTreeXl
             theWorkSheet.Cells[row, 4] = "PTI";
             theWorkSheet.Cells[row, 4].HorizontalAlignment = XlHAlign.xlHAlignRight;
             theWorkSheet.Cells[row, 4].Font.Bold = true;
+            theWorkSheet.Cells[row, 5] = "β %";
+            theWorkSheet.Cells[row, 5].HorizontalAlignment = XlHAlign.xlHAlignRight;
+            theWorkSheet.Cells[row, 5].Font.Bold = true;
+            theWorkSheet.Cells[row, 6] = "λDU*(1-β)";
+            theWorkSheet.Cells[row, 6].Characters[2, 2].Font.Subscript = true;
+            theWorkSheet.Cells[row, 6].HorizontalAlignment = XlHAlign.xlHAlignRight;
+            theWorkSheet.Cells[row, 6].Font.Bold = true;
 
-            foreach (var node in allNodes(theItem).OrderBy(xx => xx.Name))
+            var everyNode = allNodes(theItem);
+            var anyPTE = everyNode.Any(thisNode => thisNode.ProofTestEffectiveness != 1.0M);
+
+            if (anyPTE)
+            {
+                theWorkSheet.Cells[row, 7] = "C";
+                theWorkSheet.Cells[row, 7].HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                theWorkSheet.Cells[row, 7].Font.Bold = true;
+                theWorkSheet.Cells[row, 8] = "λDU*(1-β)*C";
+                theWorkSheet.Cells[row, 8].Characters[2, 2].Font.Subscript = true;
+                theWorkSheet.Cells[row, 8].HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                theWorkSheet.Cells[row, 8].Font.Bold = true;
+                theWorkSheet.Cells[row - 1, 8] = "_P";
+                theWorkSheet.Cells[row - 1, 8].Font.Bold = true;
+                theWorkSheet.Cells[row - 1, 8].HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                theWorkSheet.Cells[row, 9] = "λDU*(1-β)*(1-C)";
+                theWorkSheet.Cells[row, 9].Characters[2, 2].Font.Subscript = true;
+                theWorkSheet.Cells[row, 9].HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                theWorkSheet.Cells[row, 9].Font.Bold = true;
+                theWorkSheet.Cells[row - 1, 9] = "_L";
+                theWorkSheet.Cells[row - 1, 9].Font.Bold = true;
+                theWorkSheet.Cells[row - 1, 9].HorizontalAlignment = XlHAlign.xlHAlignCenter;
+
+                theWorkSheet.Cells[row, 10] = "Lifetime";
+                theWorkSheet.Cells[row, 10].HorizontalAlignment = XlHAlign.xlHAlignCenter;
+                theWorkSheet.Cells[row, 10].Font.Bold = true;
+            }
+
+            foreach (var node in everyNode.OrderBy(theNode => theNode.Name))
             {
                 if (node is Node theNode)
                 {
                     row += 1;
                     theWorkSheet.Cells[row, 1] = node.Name;
                     theWorkSheet.Cells[row, 2] = node.MakeModel;
-                    theWorkSheet.Cells[row, 3] = node.Lambda;
+                    theWorkSheet.Cells[row, 3] = node.BetaFreeLambda;
                     theWorkSheet.Cells[row, 3].NumberFormat = "0.00E+00";
                     theWorkSheet.Cells[row, 4] = node.PTI;
+                    if (node.Beta != 0)
+                    {
+                        theWorkSheet.Cells[row, 5] = node.Beta;
+                        theWorkSheet.Cells[row, 6] = node.Lambda;
+                        theWorkSheet.Cells[row, 6].NumberFormat = "0.00E+00";
+                    }
+                    if (node.ProofTestEffectiveness != 1)
+                    {
+                        theWorkSheet.Cells[row, 7] = node.ProofTestEffectiveness;
+                        theWorkSheet.Cells[row, 7].NumberFormat = "0%";
+                        theWorkSheet.Cells[row, 8] = node.Lambda * node.ProofTestEffectiveness;
+                        theWorkSheet.Cells[row, 8].NumberFormat = "0.00E+00";
+                        theWorkSheet.Cells[row, 9] = node.Lambda * (1 - node.ProofTestEffectiveness);
+                        theWorkSheet.Cells[row, 9].NumberFormat = "0.00E+00";
+                        theWorkSheet.Cells[row, 10] = node.LifeTime;
+                        theWorkSheet.Cells[row, 10].NumberFormat = "#,###,##0";
+                    }
                 }
             }
         }
@@ -210,15 +273,15 @@ namespace FaultTreeXl
         {
             var result = new List<GraphicItem>();
             foreach (var x in item.Nodes)
-            { 
+            {
                 result.Add(x);
                 foreach (var y in allNodes(x))
-                    result.Add(y); 
+                    result.Add(y);
 
             }
             return result;
         }
-            
+
 
 
 
@@ -231,4 +294,6 @@ namespace FaultTreeXl
         }
 
     }
+
+
 }

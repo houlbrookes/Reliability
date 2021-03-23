@@ -8,6 +8,8 @@ namespace FaultTreeXl
 {
     public class Node : GraphicItem
     {
+        public override string NodeType => "Node";
+
         [XmlIgnore]
         public override List<CutSet> CutSets
         {

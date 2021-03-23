@@ -10,26 +10,20 @@
         <local:GraphicItemTemplateSelector x:Key="GraphicItemTemplateSelector" />
         <local:GenerateCutSetsCommand x:Key="GenerateCutSetsCommand" />
         <local:SaveCommand x:Key="SaveCommand" />
+        <local:SaveAsCommand x:Key="SaveAsCommand" />
         <local:LoadCommand x:Key="LoadCommand" />
+        <local:ResetScaleCommand x:Key="ResetScaleCommand" />
         <DataTemplate x:Key="NodeTemplate" DataType="{x:Type local:Node}" >
-            <Canvas>
-                <local:NodeControl Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}" DataContext="{Binding}"/>
-            </Canvas>
+            <local:NodeControl DataContext="{Binding}"/>
         </DataTemplate>
         <DataTemplate x:Key="DiagnosedFaultTemplate" DataType="{x:Type local:Node}" >
-            <Canvas>
-                <local:DiagnosedFaultControl Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}" DataContext="{Binding}"/>
-            </Canvas>
+            <local:DiagnosedFaultControl DataContext="{Binding}"/>
         </DataTemplate>
         <DataTemplate x:Key="ORTemplate" DataType="{x:Type local:OR}" >
-            <Canvas>
-                <local:ORControl Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}" DataContext="{Binding}"/>
-            </Canvas>
+            <local:ORControl DataContext="{Binding}"/>
         </DataTemplate>
         <DataTemplate x:Key="ANDTemplate" DataType="{x:Type local:AND}" >
-            <Canvas>
-                <local:ANDControl Canvas.Left="{Binding X}" Canvas.Top="{Binding Y}" DataContext="{Binding}"/>
-            </Canvas>
+            <local:ANDControl DataContext="{Binding}"/>
         </DataTemplate>
     </Window.Resources>
     <Grid>
@@ -41,7 +35,8 @@
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="File">
                     <MenuItem Header="Load" Command="{StaticResource LoadCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Save" Command="{StaticResource SaveCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="_Save" InputGestureText="Ctrl+S" Command="{StaticResource SaveCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="SaveAs" Command="{StaticResource SaveAsCommand}" CommandParameter="{Binding}"/>
                 </MenuItem>
                 <MenuItem Header="Edit">
                     <MenuItem Header="Add" Command="{StaticResource DummyCommand}" CommandParameter="{Binding Path=HighlightedNode.Name}"/>
@@ -70,24 +65,23 @@
                 </MenuItem>
                 <MenuItem Header="Calcuations" >
                     <MenuItem Header="Recalculate" Command="{StaticResource RecalcCommand}" CommandParameter="{Binding}" />
-                    <MenuItem Header="Toggle Force Integration" Command="{StaticResource ToggleForceIntegrationCommand}" CommandParameter="{Binding}" />
+                    <MenuItem Header="Toggle Force Integration" Command="{StaticResource ToggleForceIntegrationCommand}" CommandParameter="{Binding}" IsChecked="{Binding RootNode.ForceIntegration}" />
+                    <MenuItem Header="Show Simple Calculations (XL)" Command="{StaticResource ShowSimpleCalcsCommand}" CommandParameter="{Binding RootNode}" />
+                    <MenuItem Header="Run Simulation" Command="{StaticResource RunSimulationCommand}" CommandParameter="{Binding}" />
                 </MenuItem>
-                <!--<MenuItem Header="Standard Parts" >
-                    <MenuItem Header="Show" Command="{StaticResource ChoosePartCommand}" CommandParameter="{Binding}" />
-                    <MenuItem Header="Calc CCF" Command="{StaticResource CalcCCFCommand}" CommandParameter="{Binding}" />
-                </MenuItem>-->
             </Menu>
-            <Grid DockPanel.Dock="Left" Width="250">
+            <Grid  >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="3"/>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
                 <StackPanel>
-                    <TextBlock Text="{Binding Path=Scale, StringFormat='Scale: {0:P2}'}"/>
-                    <TextBlock Text="{Binding Path=MissionTime, StringFormat='Mission: {0}'}"/>
-                    <CheckBox IsChecked="{Binding Path=ShowLifeInfo}">Show Life Info</CheckBox>
-                    <CheckBox IsChecked="{Binding Path=RootNode.ForceIntegration}">Use Integration</CheckBox>
-                    <TextBlock Text="{Binding Path=RootNode.ProofTestEffectiveness, StringFormat='PTE: {0:P2}'}"/>
-                    <ListBox>
-                        <ListBoxItem Content="OR" />
-                        <ListBoxItem Content="AND" />
-                    </ListBox>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Margin="5,0,0,0" FontWeight="Bold">Component</TextBlock>
+                        <TextBlock Margin="30,0,0,0" FontWeight="Bold">Description</TextBlock>
+                        <TextBlock Margin="80,0,0,0" FontWeight="Bold">Failure Rate</TextBlock>
+                    </StackPanel>
                     <ListBox ItemsSource="{Binding FailureRates}" >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -96,28 +90,107 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </StackPanel>
-            </Grid>
-            <Separator DockPanel.Dock="Left" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
-            <Grid>
-                <ScrollViewer Name="TheScrollViewer" HorizontalContentAlignment="Center" HorizontalScrollBarVisibility="Visible" 
-                          PreviewMouseWheel="TheScrollViewer_PreviewMouseWheel" >
-                    <ListView ItemsSource="{Binding Path=FaultTree}" ItemTemplateSelector="{StaticResource GraphicItemTemplateSelector}">
-                        <ListView.ItemsPanel>
+                <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Left" Background="Gray" Margin="0,0,0,0"/>
+                <ScrollViewer Grid.Column="2" Name="TheScrollViewer" VerticalAlignment="Top" Margin="0,0,0,0" HorizontalContentAlignment="Center" HorizontalScrollBarVisibility="Visible" 
+                              PreviewMouseWheel="TheScrollViewer_PreviewMouseWheel" >
+                    <ItemsControl ItemsSource="{Binding Path=FaultTree}" ItemTemplateSelector="{StaticResource GraphicItemTemplateSelector}">
+                        <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <Canvas Width="{Binding Path=Width}" Height="{Binding Path=Height}" Background="LightGray">
-                                    <Canvas.RenderTransform>
+                                <Canvas Width="{Binding Path=Width}" Height="{Binding Height}" Background="LightGray">
+                                    <Canvas.LayoutTransform>
                                         <ScaleTransform CenterX="0" CenterY="0" ScaleX="{Binding Scale}" ScaleY="{Binding Scale}" />
-                                    </Canvas.RenderTransform>
+                                    </Canvas.LayoutTransform>
                                 </Canvas>
                             </ItemsPanelTemplate>
-                        </ListView.ItemsPanel>
-                    </ListView>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                    </ItemsControl>
                 </ScrollViewer>
+                <Border Margin="10,10,0,0" Grid.Column="2" BorderBrush="Black" BorderThickness="1" Width="140" Height="125" 
+                        CornerRadius="5" Background="LightGreen"
+                        VerticalAlignment="Top" HorizontalAlignment="Left">
+                    <StackPanel>
+                        <TextBlock Padding="5">
+                            <Run>PFD=</Run><Run Text="{Binding RootNode.PFD, StringFormat=' {0:E2}', Mode=OneWay}"/>
+                            <LineBreak />
+                            <Run FontFamily="Symbol">l=</Run><Run Text="{Binding RootNode.Lambda, StringFormat=' {0:E2}', Mode=OneWay}"/>
+                            <LineBreak />
+                            <Run Text="{Binding Path=SILLevelPFD, StringFormat='SIL Achieved (PFD): {0}', Mode=OneWay}"/>
+                            <LineBreak />
+                            <Hyperlink Command="{StaticResource RunSimulationCommand}" CommandParameter="{Binding}">Run Simulation</Hyperlink>
+                            <Hyperlink Command="{StaticResource CancelSimulationCommand}" CommandParameter="{Binding}">/ Cancel</Hyperlink>
+                        </TextBlock>
+                        <TextBox Margin="5,0,5,0" Text="{Binding SimulationIterations}" />
+                        <CheckBox Margin="5,2,0,0" IsChecked="{Binding ResetEachSimulation}">Reset Each Simulation</CheckBox>
+                        <CheckBox Margin="5,2,0,0" IsChecked="{Binding ShowSimulationResults}">Show Results</CheckBox>
+                    </StackPanel>
+                </Border>
             </Grid>
+
         </DockPanel>
         <StatusBar Grid.Row="1">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
             <StatusBarItem >
                 <TextBlock Text="{Binding Status}" />
+            </StatusBarItem>
+            <Separator Grid.Column="1" />
+            <StatusBarItem Grid.Column="2">
+                <TextBlock Margin="5,0,0,0" Text="{Binding Path=SILLevelPFD, StringFormat='SIL Achieved (PFD): {0}'}" />
+            </StatusBarItem>
+            <Separator Grid.Column="3" />
+            <StatusBarItem Grid.Column="4">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Name="UnsavedChanges" Text="Unsaved Changes">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Hidden" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Dirty}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </StatusBarItem>
+            <Separator Grid.Column="5" />
+            <StatusBarItem Grid.Column="6">
+                <TextBlock Text="{Binding Path=MissionTime, StringFormat='Mission: {0:#,###,##0} hrs'}"/>
+            </StatusBarItem>
+            <Separator Grid.Column="7" />
+            <StatusBarItem Grid.Column="8">
+                <Grid>
+                    <TextBlock Margin="200,0,0,0" Text="{Binding Scale, StringFormat=' {0:P0}'}"/>
+                    <Slider Width="200" LargeChange="0.1" Maximum="1.5" Minimum="0.1" Value="{Binding Scale}" HorizontalAlignment="Left">
+                        <Slider.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Reset to 100%" Command="{StaticResource ResetScaleCommand}" CommandParameter="{Binding}" />
+                            </ContextMenu>
+                        </Slider.ContextMenu>
+                    </Slider>
+                </Grid>
             </StatusBarItem>
         </StatusBar>
     </Grid>
