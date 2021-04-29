@@ -47,10 +47,6 @@ namespace FaultTreeXl
             theWorkSheet.Cells[row - 2, 1].Font.Bold = true;
             theWorkSheet.Cells[row - 2, 1].HorizontalAlignment = XlHAlign.xlHAlignCenter;
 
-            //theWorkSheet.Cells[2, 1] = "Cut Set";
-            //theWorkSheet.Cells[2, 1].Font.Bold = true;
-            //theWorkSheet.Cells[2, 1].HorizontalAlignment = XlHAlign.xlHAlignCenter;
-
             // Put the heading in
             for (var i = 0; i < max_cutset_length; i++)
             {

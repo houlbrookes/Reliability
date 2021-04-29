@@ -75,10 +75,23 @@ namespace FaultTreeXl
                 {
                     node.ShowLifeInfo = _showLifeInfo;
                 }
-
             }
         }
-
+        [XmlIgnore]
+        public bool DifferentPTIs
+        {
+            get
+            {
+                bool result = false;
+                var nodeOnlyList = FaultTree.OfType<Node>();
+                if (nodeOnlyList.Count() > 0)
+                {
+                    var firstNodePTI = nodeOnlyList.FirstOrDefault()?.PTI;
+                    result = !nodeOnlyList.All(node => node.PTI == firstNodePTI);
+                }
+                return result;
+            }
+        }
         [XmlIgnore]
         public ObservableCollection<StandardFailure> FailureRates { get; set; } = new ObservableCollection<StandardFailure> { };
         public static void LoadList(ObservableCollection<StandardFailure> list)
@@ -126,14 +139,10 @@ namespace FaultTreeXl
                  || e.PropertyName == nameof(graphicItem.Lambda)
                  || e.PropertyName == nameof(graphicItem.PTI))
                 {
-                    Notify("SILLevelPFD");
+                    Notify(nameof(SILLevelPFD));
+                    Notify(nameof(DifferentPTIs));
+
                 }
-                //// Check to see if item is selected
-                //if (graphicItem.IsSelected)
-                //{
-                //    HighlightedNode = graphicItem;
-                //}
-                // Something has changed so set the dirty flag
                 Dirty = true;
             }
         }
@@ -179,80 +188,22 @@ namespace FaultTreeXl
 
         public FaultTreeModel()
         {
-            Node Node1 = new Node { Name = "A", Lambda = (decimal)1E-6, PTI = 8760, Description = "" };
-            Node Node2 = new Node { Name = "B", Lambda = (decimal)1E-6, PTI = 8760, Description = "" };
-            Node Node3 = new Node { Name = "C", Lambda = (decimal)1E-6, PTI = 8760, Description = "" };
-            Node Node4 = new Node
-            {
-                Name = "D",
-                Description = "DU Fault",
-                Lambda = (decimal)1E-6,
-                PTI = 8760,
-            };
-            Node Node5 = new Node { Name = "E", Lambda = (decimal)1E-6, PTI = 4380, Description = "PTI=1/2 year" };
-            Node Node6 = new Node { Name = "F", Lambda = (decimal)1E-6, PTI = 8760, Description = "" };
-            Node Node7 = new Node { Name = "G", Lambda = (decimal)1E-6, PTI = 8760, Description = "" };
-            Node Node8 = new Node { Name = "H", Lambda = (decimal)1E-6, PTI = 4380, Description = "PTI=1/2 year" };
-            Node Node9 = new Node { Name = "I", Lambda = (decimal)1E-6, PTI = 8760, Description = "" };
-            Node Node10 = new Node { Name = "J", Lambda = (decimal)1E-6, PTI = 8760, Description = "" };
-            Node Node11 = new Node { Name = "K", Lambda = (decimal)1E-6, PTI = 8760, Description = "" };
-            Node Node12 = new Node { Name = "CCF", Lambda = (decimal)1E-6, PTI = 8760, Description = "" };
-            Node Node13 = new Node { Name = "L", Lambda = (decimal)1E-6, PTI = 8760, Description = "" };
-            Node Node14 = new Node
-            {
-                Name = "M",
-                Description = "DD Fault (72 hrs)",
-                Lambda = (decimal)1E-6,
-                PTI = 72
-            };
 
             OR oR1 = new OR { Name = "OR 1", Description = "Root Node" };
 
             RootNode = oR1;
 
             OR oR2 = new OR { Name = "OR 2", Description = "Sensors" };
-
-            AND oR3 = new AND() { Name = "AND", Description = "Logic" };
-            oR3.Nodes.Add(Node2);
-            oR3.Nodes.Add(Node3);
-
-            OR oR8 = new OR { Name = "OR 8", Description = "DU & DD" };
-            oR8.Nodes.Add(Node4);
-            oR8.Nodes.Add(Node14);
-
+            OR oR3 = new OR() { Name = "OR 3", Description = "Logic" };
             OR oR4 = new OR { Name = "OR 4", Description = "Final Elements" };
-            oR4.Nodes.Add(oR8);
-            oR4.Nodes.Add(Node5);
-            oR4.Nodes.Add(Node7);
-
-            OR oR5 = new OR { Name = "OR 5" };
-            oR5.Nodes.Add(Node1);
-            oR5.Nodes.Add(Node6);
-
-            OR oR6 = new OR { Name = "OR 6" };
-            oR6.Nodes.Add(Node8);
-            oR6.Nodes.Add(Node9);
-
-            OR oR7 = new OR { Name = "OR 7" };
-            oR7.Nodes.Add(Node10);
-            oR7.Nodes.Add(Node11);
-
-
-            AND oAND1 = new AND { Name = "AND 1" };
-            oAND1.Nodes.Add(oR5);
-            oAND1.Nodes.Add(oR6);
-            oAND1.Nodes.Add(oR7);
 
             oR1.Nodes.Add(oR2);
             oR1.Nodes.Add(oR3);
             oR1.Nodes.Add(oR4);
 
-            oR2.Nodes.Add(oAND1);
-            oR2.Nodes.Add(Node12);
-
             ReDrawRootNode();
 
-            Status = "Loaded with Dummy Model";
+            Status = "Loaded with a blank model";
 
             RootNode.Recalculating += (_, __) => Status = "Recalculating...";
             RootNode.CalculationsComplete += (_, __) => Status = "Calculations complete";

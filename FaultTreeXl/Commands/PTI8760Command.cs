@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Windows;
 using System.Windows.Input;
 
 namespace FaultTreeXl
 {
-    class RecalcCommand : ICommand
+    class PTI8760Command : ICommand
     {
         public event EventHandler CanExecuteChanged
         {
@@ -19,12 +18,10 @@ namespace FaultTreeXl
 
         public void Execute(object parameter)
         {
-            if (parameter is FaultTreeModel ftm)
+            if (parameter is Node node)
             {
-                ftm.ReDrawRootNode();
-                ftm.Status = "Recalculated";
+                node.PTI = 8760M;
             }
         }
     }
-
 }

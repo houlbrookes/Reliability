@@ -29,6 +29,13 @@ namespace FaultTreeXl
                 };
                 theGraphic.Nodes.Add(newNode);
                 ftm.ReDrawRootNode();
+                // Open up an edit window for this node
+                OREdit editingWindow = new OREdit();
+                editingWindow.DataContext = newNode;
+                editingWindow.Owner = Application.Current.MainWindow;
+                editingWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                editingWindow.ShowDialog();
+                newNode.UpdateParent();
             }
         }
     }

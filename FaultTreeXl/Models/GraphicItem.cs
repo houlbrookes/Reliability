@@ -132,7 +132,11 @@ namespace FaultTreeXl
         public decimal BetaFreeLambda
         {
             get => lambda;
-            set => Changed(ref lambda, value, "Lambda");
+            set
+            {
+                Changed(ref lambda, value, nameof(Lambda));
+                Notify(nameof(BetaFreeLambda));
+            }
         }
 
         private decimal _pTI = 8760;

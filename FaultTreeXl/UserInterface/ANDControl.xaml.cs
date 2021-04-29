@@ -92,6 +92,14 @@ namespace FaultTreeXl
                     (DataContext as AND).Nodes.Add(theNewNode);
                     ANDSymbol.Fill = _previousFill;
                     ftm.ReDrawRootNode();
+                    // Open up an edit window for this node
+                    OREdit editingWindow = new OREdit();
+                    editingWindow.DataContext = theNewNode;
+                    editingWindow.Owner = Application.Current.MainWindow;
+                    editingWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    editingWindow.ShowDialog();
+                    theNewNode.UpdateParent();
+
                 }
                 return;
             }

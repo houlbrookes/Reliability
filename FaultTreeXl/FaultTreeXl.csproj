@@ -92,6 +92,8 @@
     </ApplicationDefinition>
     <Compile Include="Commands\CancelSimulationCommand.cs" />
     <Compile Include="Commands\DragDropCommands.cs" />
+    <Compile Include="Commands\PTI4380Command.cs" />
+    <Compile Include="Commands\PTI8760Command.cs" />
     <Compile Include="Commands\RunSimulationCommand.cs" />
     <Compile Include="Controllers\StandardFailure.cs" />
     <Compile Include="UserInterface\StandardFailureControl.xaml.cs" />

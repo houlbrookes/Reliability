@@ -50,5 +50,7 @@
 
         <local:RunSimulationCommand x:Key="RunSimulationCommand" />
         <local:CancelSimulationCommand x:Key="CancelSimulationCommand" />
+        <local:PTI8760Command x:Key="PTI8760Command" />
+        <local:PTI4380Command x:Key="PTI4380Command" />
     </Application.Resources>
 </Application>
