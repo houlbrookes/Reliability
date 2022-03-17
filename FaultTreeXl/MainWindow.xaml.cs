@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,9 +21,9 @@ namespace FaultTreeXl
     /// </summary>
     public partial class MainWindow : Window
     {
-        Point? lastCenterPositionOnTarget;
-        Point? lastMousePositionOnTarget;
-        Point? lastDragPoint;
+        //Point? lastCenterPositionOnTarget;
+        //Point? lastMousePositionOnTarget;
+        //Point? lastDragPoint;
 
         public MainWindow()
         {
@@ -74,5 +75,23 @@ namespace FaultTreeXl
             }
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is FaultTreeModel ftm)
+            {
+                var args = Environment.GetCommandLineArgs();
+                if (args.Length > 1)
+                {
+                    // application has been started with a fta filename
+                    var fileName = args[1];
+                    var extension = System.IO.Path.GetExtension(fileName);
+                    if (File.Exists(fileName) && extension == ".fta")
+                    {
+                        var loadCommand = new LoadCommand();
+                        loadCommand.LoadFromFile(fileName, ftm);
+                    }
+                }
+            }
+        }
     }
 }

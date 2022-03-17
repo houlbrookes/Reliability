@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:FaultTreeXl" Closing="Window_Closing"
-        mc:Ignorable="d" DataContext="{StaticResource GlobalFaultTreeModel}" 
+        xmlns:local="clr-namespace:FaultTreeXl" Closing="Window_Closing" Background="LightGray"
+        mc:Ignorable="d" DataContext="{StaticResource GlobalFaultTreeModel}" Loaded="Window_Loaded"
         Title="{Binding Path=Filename, StringFormat='Fault Tree: {0}'}" Height="450" Width="800">
     <Window.Resources>
         <local:GraphicItemTemplateSelector x:Key="GraphicItemTemplateSelector" />
@@ -48,6 +48,8 @@
                     <MenuItem Header="Show/Hide Life Info" 
                               Command="{StaticResource ToggleShowLifeCommand}" 
                               CommandParameter="{Binding}"/>
+                    <MenuItem Header="Show Architectural Constraints" 
+                              Command="{StaticResource LaunchSFFWindowCommand}"/>
                 </MenuItem>
                 <MenuItem Header="Cut Sets" Command="{StaticResource GenerateCutSetsCommand}" CommandParameter="{Binding}"/>
                 <MenuItem Header="Visio" >
@@ -68,6 +70,10 @@
                     <MenuItem Header="Toggle Force Integration" Command="{StaticResource ToggleForceIntegrationCommand}" CommandParameter="{Binding}" IsChecked="{Binding RootNode.ForceIntegration}" />
                     <MenuItem Header="Show Simple Calculations (XL)" Command="{StaticResource ShowSimpleCalcsCommand}" CommandParameter="{Binding RootNode}" />
                     <MenuItem Header="Run Simulation" Command="{StaticResource RunSimulationCommand}" CommandParameter="{Binding}" />
+                    <MenuItem Header="Show Manual Calculations (Word)" Command="{StaticResource ShowManualCalcsCommand}" CommandParameter="{Binding RootNode}" />
+                </MenuItem>
+                <MenuItem Header="About" >
+                    <MenuItem Header="About" Command="{StaticResource AboutCommand}" />
                 </MenuItem>
             </Menu>
             <Grid  >
@@ -82,6 +88,7 @@
                         <TextBlock Margin="30,0,0,0" FontWeight="Bold">Description</TextBlock>
                         <TextBlock Margin="80,0,0,0" FontWeight="Bold">Failure Rate</TextBlock>
                     </StackPanel>
+                    <!-- Display for the Standard Failiure Rates -->
                     <ListBox ItemsSource="{Binding FailureRates}" >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -91,6 +98,7 @@
                     </ListBox>
                 </StackPanel>
                 <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Left" Background="Gray" Margin="0,0,0,0"/>
+                <!-- Fault Tree in a Scroll Viewer -->
                 <ScrollViewer Grid.Column="2" Name="TheScrollViewer" VerticalAlignment="Top" Margin="0,0,0,0" HorizontalContentAlignment="Center" HorizontalScrollBarVisibility="Visible" 
                               PreviewMouseWheel="TheScrollViewer_PreviewMouseWheel" >
                     <ItemsControl ItemsSource="{Binding Path=FaultTree}" ItemTemplateSelector="{StaticResource GraphicItemTemplateSelector}">
@@ -111,7 +119,8 @@
                         </ItemsControl.ItemContainerStyle>
                     </ItemsControl>
                 </ScrollViewer>
-                <Border Margin="10,135,0,0" Grid.Column="2" BorderBrush="Black" BorderThickness="1" Width="140" Height="50" 
+                <!-- Warnings Box -->
+                <Border Margin="10,185,0,0" Grid.Column="2" BorderBrush="Black" BorderThickness="1" Width="140" Height="50" 
                         CornerRadius="5" Background="Yellow" 
                         VerticalAlignment="Top" HorizontalAlignment="Left">
                     <Border.Style>
@@ -128,16 +137,23 @@
                         <Run>Some components have a different PTI</Run>
                     </TextBlock>
                 </Border>
-                <Border Margin="10,10,0,0" Grid.Column="2" BorderBrush="Black" BorderThickness="1" Width="140" Height="125" 
+                <!-- Summary & Options Box -->
+                <Border Margin="10,10,0,0" Grid.Column="2" BorderBrush="Black" BorderThickness="1" Width="140" Height="170" 
                         CornerRadius="5" Background="LightGreen"
                         VerticalAlignment="Top" HorizontalAlignment="Left">
                     <StackPanel>
                         <TextBlock Padding="5">
-                            <Run>PFD=</Run><Run Text="{Binding RootNode.PFD, StringFormat=' {0:E2}', Mode=OneWay}"/>
+                            <Run>PFD=</Run>
+                            <Run Text="{Binding RootNode.PFD, StringFormat=' {0:E2}', Mode=OneWay}"/>
                             <LineBreak />
-                            <Run FontFamily="Symbol">l=</Run><Run Text="{Binding RootNode.Lambda, StringFormat=' {0:E2}', Mode=OneWay}"/>
+                            <Run FontFamily="Symbol">l=</Run>
+                            <Run Text="{Binding RootNode.Lambda, StringFormat=' {0:E2}', Mode=OneWay}"/>
                             <LineBreak />
-                            <Run Text="{Binding Path=SILLevelPFD, StringFormat='SIL Achieved (PFD): {0}', Mode=OneWay}"/>
+                            <Run Text="{Binding SILLevelPFD, StringFormat='SIL Achieved (PFD): {0}', Mode=OneWay}"/>
+                            <LineBreak />
+                            <Run Text="{Binding SILLevelPFH, StringFormat='SIL Achieved (PFH): {0}', Mode=OneWay}" />
+                            <LineBreak />
+                            <Run Text="{Binding RootNode.ArchSIL, StringFormat='SIL Arch Constraints: {0}', Mode=OneWay}" />
                             <LineBreak />
                             <Hyperlink Command="{StaticResource RunSimulationCommand}" CommandParameter="{Binding}">Run Simulation</Hyperlink>
                             <Hyperlink Command="{StaticResource CancelSimulationCommand}" CommandParameter="{Binding}">/ Cancel</Hyperlink>
@@ -145,6 +161,7 @@
                         <TextBox Margin="5,0,5,0" Text="{Binding SimulationIterations}" />
                         <CheckBox Margin="5,2,0,0" IsChecked="{Binding ResetEachSimulation}">Reset Each Simulation</CheckBox>
                         <CheckBox Margin="5,2,0,0" IsChecked="{Binding ShowSimulationResults}">Show Results</CheckBox>
+                        <CheckBox Margin="5,2,0,0" IsChecked="{Binding ShowArchConstraints}">Show Arch Constr</CheckBox>
                     </StackPanel>
                 </Border>
             </Grid>

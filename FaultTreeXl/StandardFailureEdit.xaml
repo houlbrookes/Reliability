@@ -1,0 +1,67 @@
+﻿<Window x:Class="FaultTreeXl.StandardFailureEdit"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FaultTreeXl"
+        mc:Ignorable="d" d:DataContext="{DynamicResource DC}" WindowStartupLocation="CenterOwner"
+        Title="Standard Failure" Height="200" Width="400">
+    <Window.Resources>
+        <local:StandardFailure x:Key="DC" 
+                               Name="MSR 127" 
+                               Type="Safety Relay" 
+                               Rate="1.00E-7" 
+                               TotalRate="1.00E-06"
+                               IsA="True"/>
+        <Style TargetType="TextBox" >
+            <Setter Property="Width" Value="300"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="TextAlignLeft" TargetType="CheckBox">
+            <Style.Resources>
+                <Style TargetType="Path">
+                    <Setter Property="FlowDirection" Value="LeftToRight" />
+                </Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="FlowDirection" Value="LeftToRight" />
+                </Style>
+            </Style.Resources>
+
+            <Setter Property="FlowDirection" Value="RightToLeft" />
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="67"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Label Target="{Binding ElementName=txtName}" Grid.Row="0" Grid.Column="0">_Name</Label>
+        <Label Target="{Binding ElementName=txtType}" Grid.Row="1" Grid.Column="0">_Type</Label>
+        <Label Target="{Binding ElementName=txtRate}" Grid.Row="2" Grid.Column="0">_Rate</Label>
+        <Label Target="{Binding ElementName=txtTotalRate}" Grid.Row="3" Grid.Column="0">T_otal Rate</Label>
+        <Label Target="{Binding ElementName=txtSFF}" Grid.Row="4" Grid.Column="0">_SFF</Label>
+
+        <TextBox Name="txtName" Grid.Row="0" Grid.Column="1" Text="{Binding Name}"/>
+        <TextBox Name="txtType"  Grid.Row="1" Grid.Column="1" Text="{Binding Type}"/>
+        <TextBox Name="txtRate" Grid.Row="2" Grid.Column="1" Text="{Binding Rate, StringFormat='{}{0:E2}'}"/>
+        <TextBox Name="txtTotalRate" Grid.Row="3" Grid.Column="1" Text="{Binding TotalRate, StringFormat='{}{0:E2}'}"/>
+        <TextBox Name="txtSFF" Grid.Row="4" Grid.Column="1" Text="{Binding SFF, StringFormat='{}{0:P2}', Mode=OneWay}" IsReadOnly="True" />
+        <CheckBox Name="chkIsTypeA" Margin="0,0,0,0" Grid.Row="5" Grid.Column="1" IsChecked="{Binding IsA}" 
+                  HorizontalAlignment="Left" Style="{StaticResource TextAlignLeft}">?Type A</CheckBox>
+        <StackPanel Orientation="Horizontal" Grid.Row="6" Grid.ColumnSpan="2" HorizontalAlignment="Center">
+            <Button Name="OkButton" Content="Ok" Click="OkButton_Click" Width="100" Margin="0,0,0,5" IsDefault="True"/>
+            <Button Name="CancelButton" Content="Cancel" Width="100" Margin="0,0,0,5" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -62,13 +62,6 @@ namespace FaultTreeXl
             // combine them into a single function
             var combinedFunction = functionList.Skip(1).Aggregate(functionList.First(), Multiply);
 
-            //return (decimal)(MathNet.Numerics.Integration.NewtonCotesTrapeziumRule.IntegrateAdaptive(
-            //               f: t => combinedFunction(t),
-            //               intervalBegin: 0,
-            //               intervalEnd: missionTime, targetError: 1E-8)
-            //               );
-
-
             // integrate over the mission time and divide by the mission time
             return (decimal)(MathNet.Numerics.Integration.SimpsonRule.IntegrateComposite(
                            f: t => combinedFunction(t),

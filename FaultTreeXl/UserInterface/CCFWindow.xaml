@@ -6,7 +6,8 @@
         xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         xmlns:local="clr-namespace:FaultTreeXl"
         mc:Ignorable="d" DataContext="{DynamicResource DataContext}"
-        Title="{Binding Node2UpdateFrom.Name, StringFormat='Node to Update {0}'}" Height="415" Width="300" Loaded="Window_Loaded">
+        Title="{Binding Node2UpdateFrom.Name, StringFormat='Node to Update {0}'}" 
+        Height="415" Width="450" Loaded="Window_Loaded">
     <Window.Resources>
         <local:CCFWindowController x:Key="DataContext" NodesOnly="True" UpdateSource="True"/>
     </Window.Resources>
@@ -35,6 +36,8 @@
             <TextBox Width="50" Text="{Binding Path=CCFRate}" VerticalAlignment="Center" />
             <CheckBox Margin="5,4,0,0" IsChecked="{Binding UpdateSource}">Update Source</CheckBox>
             <CheckBox Name="NodesOnly" Margin="5,4,0,0" IsChecked="{Binding NodesOnly}">Nodes</CheckBox>
+            <CheckBox Name="Everything" Margin="5,4,0,0" IsChecked="{Binding Everything}">Everything</CheckBox>
+            <ComboBox ItemsSource="{Binding Choices}" SelectedItem="{Binding Choice}" Width="70" Margin="5,0,0,0" Height="25" VerticalAlignment="Top"/>
         </StackPanel>
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" >
             <Button Width="100" Margin="0,0,10,0" IsCancel="True" Click="Button_Click">Close</Button>

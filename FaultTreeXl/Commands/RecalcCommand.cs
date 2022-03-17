@@ -22,6 +22,8 @@ namespace FaultTreeXl
             if (parameter is FaultTreeModel ftm)
             {
                 ftm.ReDrawRootNode();
+                ftm.Notify(nameof(ftm.SILLevelPFD));
+                ftm.Notify(nameof(ftm.SILLevelPFH));
                 ftm.Status = "Recalculated";
             }
         }

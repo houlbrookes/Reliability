@@ -8,6 +8,25 @@
              Height="110" Width="100">
     <UserControl.Resources>
         <local:AND x:Key="DataModel" />
+
+        <Style x:Key="ShowSimulation" TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=DataContext.ShowSimulationResults, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="True" >
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ShowCalculation" TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Visible"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=DataContext.ShowSimulationResults, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="True" >
+                    <Setter Property="Visibility" Value="Hidden" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
     </UserControl.Resources>
 
     <Grid d:DataContext="{StaticResource DataModel}">
@@ -28,6 +47,7 @@
                     <MenuItem Header="Move Up" Command="{StaticResource MoveUpCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Move Down" Command="{StaticResource MoveDownCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Show Calcs" Command="{StaticResource ShowCalcsCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Toggle Collapsed View" Command="{StaticResource ToggleCollapseCommand}" CommandParameter="{Binding}"/>
                 </ContextMenu>
             </Canvas.ContextMenu>
             <Line X1="50" Y1="-10" X2="50" Y2="0" Stroke="Black"/>
@@ -51,9 +71,35 @@
                 <Path.Fill>
                     <SolidColorBrush Color="RosyBrown" />
                 </Path.Fill>
-
             </Path>
-            <TextBlock Margin="3,2,0,0" Height="15" Width="95" Text="{Binding Path=Description}" TextAlignment="Center">
+            <Path Stroke="Black" Margin="0,15,0,0">
+                <Path.Data>
+                    <PathGeometry>
+                        <PathFigure StartPoint="20,110">
+                            <LineSegment Point="50,55"/>
+                            <LineSegment Point="80,110"/>
+                            <LineSegment Point="20,110"/>
+                        </PathFigure>
+                    </PathGeometry>
+                </Path.Data>
+                <Path.RenderTransform>
+                    <TranslateTransform Y="65"/>
+                </Path.RenderTransform>
+                <Path.Fill>
+                    <SolidColorBrush Color="Green" />
+                </Path.Fill>
+                <Path.Style>
+                    <Style TargetType="Path">
+                        <Setter Property="Visibility" Value="Hidden"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Collapsed}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Path.Style>
+            </Path >
+            <!--<TextBlock Margin="3,2,0,0" Height="15" Width="95" Text="{Binding Path=Description}" TextAlignment="Center">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock" >
                         <Setter Property="Background" Value="Transparent" />
@@ -64,13 +110,13 @@
                         </Style.Triggers>
                     </Style>
                 </TextBlock.Style>
-            </TextBlock>
-            <TextBlock Margin="5,15,0,0" Height="15" Width="95" Text="{Binding Path=PFD,StringFormat='PFD: {0:E2}'}" TextAlignment="Center" />
+            </TextBlock>-->
+            <!--<TextBlock Margin="5,15,0,0" Height="15" Width="95" Text="{Binding Path=PFD,StringFormat='PFD: {0:E2}'}" TextAlignment="Center" />
             <StackPanel Margin="15,30,0,0" Orientation="Horizontal" Width="90" HorizontalAlignment="Center">
                 <TextBlock Height="15" Text="l" FontFamily="Symbol" />
                 <TextBlock Height="15" Text="{Binding Path=Lambda,StringFormat=': {0:E2}/hr'}"/>
             </StackPanel>
-            <TextBlock Margin="5,45,0,0" Height="15" Width="95" Text="{Binding Path=MDT,StringFormat='MDT: {0:N0} hrs'}" TextAlignment="Center" />
+            <TextBlock Margin="5,45,0,0" Height="15" Width="95" Text="{Binding Path=MDT,StringFormat='MDT: {0:N0} hrs'}" TextAlignment="Center" />-->
             <Rectangle Height="30" Width="90" Canvas.Left="5" Canvas.Top="85" Stroke="Black">
                 <Rectangle.Fill>
                     <LinearGradientBrush EndPoint="0.5,1.5" StartPoint="0.5,0">
@@ -80,30 +126,57 @@
                     </LinearGradientBrush>
                 </Rectangle.Fill>
             </Rectangle>
+            <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Left" Style="{StaticResource ShowCalculation}">
+                <Run Text="{Binding Path=Description, Mode=OneWay}" FontWeight="Bold" TextDecorations="Underline"/>
+                <LineBreak />
+                <Run >PFD:</Run><Run Text="{Binding Path=PFD,StringFormat=' {0:E2}', Mode=OneWay}"/>
+                <LineBreak />
+                <Run FontFamily="Symbol">l:</Run><Run Text="{Binding Path=Lambda,StringFormat=' {0:E2}', Mode=OneWay}"/> /hr
+                <LineBreak/>
+                <Run >MDT:</Run><Run Text="{Binding Path=MDT,StringFormat=' {0:###,##0}', Mode=OneWay}"/> hrs
+            </TextBlock>
             <Border Canvas.Left="5" Canvas.Top="85" Height="30" Width="90">
                 <TextBlock Text="{Binding Path=Name}" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"/>
             </Border>
-            <Line X1="50" Y1="125" X2="50" Y2="135" Stroke="Black"/>
-            <Line X1="{Binding X2}" Y1="135" X2="{Binding X3}" Y2="135" Stroke="Black"/>
-            <TextBlock Canvas.Left="-80" Canvas.Top="12">
+            <TextBlock Margin="72,67,0,0" Height="15" Width="90" Text="{Binding Path=ArchSIL,StringFormat='SIL: {0:N0}'}" TextAlignment="Left" />
+
+            <Line X1="50" Y1="125" X2="50" Y2="135" Stroke="Black">
+                <!--<Line.Style>
+                    <Style TargetType="Line">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Collapsed}" Value="True">
+                                <Setter Property="Visibility" Value="Hidden"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Line.Style>-->
+
+            </Line>
+            <Line X1="{Binding X2}" Y1="135" X2="{Binding X3}" Y2="135" Stroke="Black">
+                <Line.Style>
+                    <Style TargetType="Line">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Collapsed}" Value="True">
+                                <Setter Property="Visibility" Value="Hidden"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Line.Style>
+
+            </Line>
+            <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Center" Style="{StaticResource ShowSimulation}">
+                <Run Text="{Binding Path=Description, Mode=OneWay}" FontWeight="Bold" TextDecorations="Underline"/>
+                <LineBreak />
                 <Run >PFD:</Run><Run Text="{Binding Path=SimulatedPFD,StringFormat=' {0:E2}', Mode=OneWay}"/>
                 <LineBreak />
                 <Run FontFamily="Symbol">l:</Run><Run Text="{Binding Path=SimulatedFailureRate,StringFormat=' {0:E2}', Mode=OneWay}"/> /hr
                 <LineBreak/>
                 <Run >MDT:</Run><Run Text="{Binding Path=SimulatedMeanDowntime,StringFormat=' {0:###,##0}', Mode=OneWay}"/> hrs
-                <LineBreak/>
-                <Run >Events:</Run><Run Text="{Binding Path=FailureCount,StringFormat=' {0:###,##0}', Mode=OneWay}"/>
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Visibility" Value="Hidden"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=DataContext.ShowSimulationResults, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="True" >
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
             </TextBlock>
+            <TextBlock Margin="0,65,0,0" Text="{Binding FailureCount, StringFormat=' {0:###,##0}'}" Style="{StaticResource ShowSimulation}"/>
+
         </Canvas>
     </Grid>
 </UserControl>

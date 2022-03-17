@@ -32,6 +32,9 @@ namespace FaultTreeXl
                 mc.ReDrawRootNode();
                 mc.ShowingCutsets = false;
                 mc.Dirty = false;
+                mc.Notify(nameof(mc.SILLevelPFD));
+                mc.Notify(nameof(mc.SILLevelPFH));
+                mc.Status = $"Fault Tree loaded from file: {fileName}";
             }
         }
 
@@ -43,9 +46,7 @@ namespace FaultTreeXl
             {
                 if (parameter is FaultTreeModel mc)
                 {
-                    //mc.Filename = fileName;
                     LoadFromFile(fileName, mc);
-                    mc.Status = $"Fault Tree loaded from file: {fileName}";
                 }
             }
 

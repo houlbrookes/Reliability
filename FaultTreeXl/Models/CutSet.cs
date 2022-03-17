@@ -39,7 +39,8 @@ namespace FaultTreeXl
             }
             else
             {
-                throw new NotImplementedException();
+                return false;
+                //throw new NotImplementedException();
             }
         }
 

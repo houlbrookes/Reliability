@@ -21,16 +21,27 @@ namespace FaultTreeXl
 
         public void Execute(object parameter)
         {
-            FaultTreeModel ftm = Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel;
-            if (parameter is GraphicItem theGraphic)
+            try
             {
-                AND newNode = new AND()
+                var ftm = Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel;
+                if (parameter is GraphicItem theGraphic)
                 {
-                    Name = $"AND {ftm.NextNodeName("AND") + 1}",
-                    Nodes = new ObservableCollection<GraphicItem> {}
-                };
-                theGraphic.Nodes.Add(newNode);
-                (Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel).ReDrawRootNode();
+                    AND newNode = new AND()
+                    {
+                        Name = $"AND {ftm.NextNodeName("AND") + 1}",
+                        Nodes = new ObservableCollection<GraphicItem> {}
+                    };
+                    theGraphic.Nodes.Add(newNode);
+                    ftm.ReDrawRootNode();
+                }
+            }
+            catch (ResourceReferenceKeyNotFoundException)
+            {
+                MessageBox.Show("GlobalFaultTreeModel not found in application resources", "Error", MessageBoxButton.OK,MessageBoxImage.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

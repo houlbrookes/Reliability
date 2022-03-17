@@ -58,37 +58,89 @@ namespace FaultTreeXl
             return result;
         }
 
+        /// <summary>
+        /// Indicates that the node is shown collapsed
+        /// Should only affect ORs and ANDs
+        /// </summary>
+        private bool _collapsed = false; // show node by default
+        [XmlIgnore]
+        public bool Collapsed
+        {
+            get => _collapsed;
+            set => Changed(ref _collapsed, value, nameof(Collapsed));
+        }
+
+
         public override int GetHashCode()
         {
             return Name.GetHashCode();
         }
 
-        private string name = "Node";
+        private string _name = "Node";
         [XmlAttribute]
         public string Name
         {
-            get => name;
+            get => _name;
             set
             {
-                Changed(ref name, value);
-                Notify("IsCCF");
+                Changed(ref _name, value);
+                Notify(nameof(IsCCF));
             }
         }
 
+        public string FormulaName { get => _name.Replace("_", "").Replace(" ", "").Replace("+", ""); }
+
+        /// <summary>
+        /// Identifies node as Common Cause Factor
+        /// </summary>
         [XmlIgnore]
         public bool IsCCF
         {
             get => this.Name.Contains("CCF");
         }
 
-
-        private string description = "No description";
+        private string _description = "No description";
         [XmlAttribute]
-        public string Description { get => description; set => Changed(ref description, value); }
+        public string Description { get => _description; set => Changed(ref _description, value); }
 
-        private string makeModel = "Generic";
-        public string MakeModel { get => makeModel; set => Changed(ref makeModel, value); }
+        private string _makeModel = "Generic";
+        public string MakeModel { get => _makeModel; set => Changed(ref _makeModel, value); }
 
+        private decimal _totalFailRate;
+        public decimal TotalFailRate
+        {
+            get => _totalFailRate>0? _totalFailRate : BetaFreeLambda;
+            set => Changed(ref _totalFailRate, value, nameof(TotalFailRate));
+        }
+
+        private bool _isA;
+
+        public bool IsA
+        {
+            get => _isA;
+            set => Changed(ref _isA, value, nameof(IsA));
+        }
+
+        public double SFF { get => (double)(1M-BetaFreeLambda/TotalFailRate); }
+        public virtual int ArchSIL
+        {
+            get
+            {
+                if (IsA)
+                {
+                    if (SFF < 0.60) return 1;
+                    else if (SFF < 0.90) return 2;
+                    else if (SFF < 0.99) return 3;
+                    else return 4;
+                }
+                else
+                {
+                    if (SFF < 0.90) return 1;
+                    else if (SFF < 0.99) return 2;
+                    else return 3;
+                }
+            }
+        }
 
         [XmlIgnore]
         virtual public List<CutSet> CutSets { get; } = new List<CutSet>();
@@ -101,26 +153,26 @@ namespace FaultTreeXl
         [XmlIgnore]
         public string CutSetsAsString { get => CutSets.AsString(); }
 
-        private double beta = 0.0;
-        public double Beta { get => beta; set => Changed(ref beta, value); }
+        private double _beta = 0.0;
+        public double Beta { get => _beta; set => Changed(ref _beta, value); }
 
-        private decimal lambda = 0;
+        private decimal _lambda = 0;
         /// <summary>
         /// Failure rate (often referred to as Lambda
         /// </summary>
         [XmlAttribute]
         virtual public decimal Lambda
         {
-            get => lambda * ((decimal)(1.0 - Beta / 100));
+            get => _lambda * ((decimal)(1.0 - Beta / 100));
             set
             {
                 if (Beta > 0)
                 {
-                    Changed(ref lambda, value / ((decimal)(1.0 - Beta / 100)));
+                    Changed(ref _lambda, value / ((decimal)(1.0 - Beta / 100)));
                 }
                 else
                 {
-                    Changed(ref lambda, value);
+                    Changed(ref _lambda, value);
                 }
 
                 Notify("PFD");
@@ -129,12 +181,12 @@ namespace FaultTreeXl
                 CalculationsComplete?.Invoke(this, EventArgs.Empty);
             }
         }
-        public decimal BetaFreeLambda
+        public virtual decimal BetaFreeLambda
         {
-            get => lambda;
+            get => _lambda;
             set
             {
-                Changed(ref lambda, value, nameof(Lambda));
+                Changed(ref _lambda, value, nameof(Lambda));
                 Notify(nameof(BetaFreeLambda));
             }
         }
@@ -153,6 +205,11 @@ namespace FaultTreeXl
                 Notify("PFD");
                 UpdateParent();
             }
+        }
+
+        internal virtual void UpdateBeta(double v)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -175,7 +232,7 @@ namespace FaultTreeXl
 
         /// <summary>
         /// Probability of Failure on Demand
-        /// Most of the word is done in the the CutSets Extension class
+        /// Most of the work is done in the the CutSets Extension class
         /// the formula used is simple: OR together the PFD from each Minimal Cut Set
         /// i.e. Multiply them together and subtract from 1.
         /// This is only possible because I'm using a Decimal floating point, 
@@ -185,7 +242,9 @@ namespace FaultTreeXl
         public decimal PFD
         {
             // calculated from the cutsets of the OR/AND/Node
+            // commented out correct version 
             //get => 1M - CutSets.Select(cs => (1-cs.PFD)).Product();
+            // dumbed-down version for simple calcs
             get => CutSets.Sum(cs => cs.PFD);
         }
 
@@ -195,6 +254,82 @@ namespace FaultTreeXl
         {
             get => _forceIntegration;
             set => Changed(ref _forceIntegration, value);
+        }
+
+        public virtual (string, string) FormulaString()
+        {
+            if (Beta > 0)
+            {
+                return ("Standard 1oo1 DU (beta)", $"((1-β).λ_{FormulaName}.T)/2");
+            }
+            else
+            {
+                return ("Standard 1oo1 DU", $"(λ_{FormulaName}.T)/2");
+            }
+        }
+
+        public virtual (string, string) FormulaLambdaString()
+        {
+            if (Beta > 0)
+            {
+                if (ProofTestEffectiveness>0)
+                return ("Standard 1oo1 DU Lambda β", $"(1-β).λ_{FormulaName}");
+                else
+                    return ("Standard 1oo1 DU Lambda β", $"(1-β).λ_{FormulaName}");
+            }
+            else
+            {
+                return ("Standard 1oo1 DU Lambda", $"λ_{FormulaName}");
+            }
+
+        }
+
+        public virtual (string, string) ValuesString()
+        {
+            if (Beta == 0)
+            {
+                if (ProofTestEffectiveness == 1)
+                {
+                    return ("Standard 1oo1 DU", $"({Lambda.FormatDouble()} × {PTI})/2");
+                }
+                else
+                {
+                    return ("", $"({ProofTestEffectiveness} × {Lambda.FormatDouble()} × {PTI})/2");
+                }
+            }
+            else
+            {
+                if (ProofTestEffectiveness == 1)
+                {
+                    return ("Standard 1oo1 DU", $"((1-{Beta/100}) × {BetaFreeLambda.FormatDouble()} × {PTI})/2");
+                }
+                else
+                {
+                    return ("", $"({ProofTestEffectiveness} × (1-{Beta/100.0}) × {BetaFreeLambda.FormatDouble()} × {PTI})/2");
+                }
+            }
+        }
+
+        public virtual (string, string) ValuesLambdaString()
+        {
+            if (Nodes.Count() > 0)
+            {
+                var indivdualNodes = Nodes.Select(n => n.ValuesLambdaString().Item2);
+
+                return ("Nodes", string.Join(" + ", indivdualNodes));
+            }
+            else
+                return ("Standard 1oo1 DU", $"{Lambda.FormatDouble()}");
+        }
+
+        public virtual (string, string) TotalString()
+        {
+            return ("From Calculated PFD", $"PFD_{FormulaName} = {PFD.FormatDouble()}");
+        }
+
+        public virtual (string, string) TotalLambdaString()
+        {
+            return ("From Calculated PFD", $"λ_{FormulaName}={BetaFreeLambda.FormatDouble()} × {Beta/100D}");
         }
 
         /// <summary>
@@ -243,43 +378,51 @@ namespace FaultTreeXl
         {
             double newX = x1;
             //double prevX = x1;
-            GraphicItem[] nodeArray = Nodes.ToArray();
-            for (int i = 0; i < nodeArray.Length; i++)
+            if (!Collapsed)
             {
-                GraphicItem g = nodeArray[i];
-                g.Parent = this;
-                if ((g.Nodes.Count > 0) || (i < 1))
+                GraphicItem[] nodeArray = Nodes.ToArray();
+                for (int i = 0; i < nodeArray.Length; i++)
                 {
-                    newX = g.AssignXY(newX, y1 + GRAPHIC_HEIGHT);
+                    GraphicItem g = nodeArray[i];
+                    g.Parent = this;
+                    if ((g.Nodes.Count > 0) || (i < 1))
+                    {
+                        newX = g.AssignXY(newX, y1 + GRAPHIC_HEIGHT);
+                    }
+                    else
+                    {
+                        double NodeX = g.AssignXY(nodeArray[i - 1].X + GRAPHIC_WIDTH, y1 + GRAPHIC_HEIGHT);
+                        // don't update newX unless the NodeX is larger than newX
+                        newX = Math.Max(NodeX, newX);
+                    }
+                    //prevX = newX;
+                }
+
+                if (Nodes.Count > 0)
+                {   // this is a parent node
+                    // Centre the item within its children
+                    // and set up the X2/3 for the connecting line
+                    X = (nodeArray[0].X + nodeArray[nodeArray.Length - 1].X) / 2;
+                    this.Y = y1;
+
+                    this.X2 = Nodes.First().X + 50 - X;
+                    this.X3 = Nodes.Last().X + 50 - X;
+                    return Math.Max(newX, GRAPHIC_WIDTH);
                 }
                 else
-                {
-                    double NodeX = g.AssignXY(nodeArray[i - 1].X + GRAPHIC_WIDTH, y1 + GRAPHIC_HEIGHT);
-                    // don't update newX unless the NodeX is larger than newX
-                    newX = Math.Max(NodeX, newX);
+                {   // this is a Node (leaf)
+                    // leave the item where it is (newX, y1)
+                    this.X = newX;
+                    this.Y = y1;
+                    return newX + GRAPHIC_WIDTH;
                 }
-                //prevX = newX;
-            }
-
-            if (Nodes.Count > 0)
-            {   // this is a parent node
-                // Centre the item within its children
-                // and set up the X2/3 for the connecting line
-                X = (nodeArray[0].X + nodeArray[nodeArray.Length - 1].X) / 2;
-                this.Y = y1;
-
-                this.X2 = Nodes.First().X + 50 - X;
-                this.X3 = Nodes.Last().X + 50 - X;
-                return Math.Max(newX, GRAPHIC_WIDTH);
             }
             else
-            {   // this is a Node (leaf)
-                // leave the item where it is (newX, y1)
+            {
                 this.X = newX;
                 this.Y = y1;
                 return newX + GRAPHIC_WIDTH;
             }
-
         }
 
         [XmlIgnore]
@@ -289,38 +432,20 @@ namespace FaultTreeXl
         /// <summary>
         /// Top Left Hand Corner
         /// </summary>
-        private double x = 0D;
-        [XmlIgnore] public double X { get => x; set => Changed(ref x, value); }
+        private double _x = 0D;
+        [XmlIgnore] public double X { get => _x; set => Changed(ref _x, value); }
 
-        private double y = 0D;
-        [XmlIgnore] public double Y { get => y; set => Changed(ref y, value); }
+        private double _y = 0D;
+        [XmlIgnore] public double Y { get => _y; set => Changed(ref _y, value); }
 
         /// <summary>
         /// Extent of the left line
         /// </summary>
-        private double x2 = 0D;
-        [XmlIgnore] public double X2 { get => x2; set => Changed(ref x2, value); }
+        private double _x2 = 0D;
+        [XmlIgnore] public double X2 { get => _x2; set => Changed(ref _x2, value); }
 
-        private double x3 = 0D;
-        [XmlIgnore] public double X3 { get => x3; set => Changed(ref x3, value); }
-
-        //private bool isSelected = false;
-        //[XmlIgnore]
-        //public bool IsSelected
-        //{
-        //    get => isSelected;
-        //    set
-        //    {
-        //        if (value)
-        //        {
-        //            var topNode = this;
-        //            while (topNode.Parent != null)
-        //                topNode = topNode.Parent;
-        //            topNode.ClearSelection();
-        //        }
-        //        Changed(ref isSelected, value);
-        //    }
-        //}
+        private double _x3 = 0D;
+        [XmlIgnore] public double X3 { get => _x3; set => Changed(ref _x3, value); }
 
         private bool _showLifeInfo = false;
         [XmlIgnore]
@@ -329,14 +454,6 @@ namespace FaultTreeXl
             get => _showLifeInfo;
             set => Changed(ref _showLifeInfo, value);
         }
-
-
-        //private void ClearSelection()
-        //{
-        //    IsSelected = false;
-        //    foreach (var subNode in Nodes)
-        //        subNode.ClearSelection();
-        //}
 
     }
 
@@ -398,6 +515,9 @@ namespace FaultTreeXl
             }
         }
 
+        //
+        // Routines to support validation of edited objects
+        //
         public string Error => Errors.Count > 0 ? Errors.First().Value : string.Empty;
 
         private Dictionary<string, string> Errors = new Dictionary<string, string>();

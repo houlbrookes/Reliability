@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -21,6 +22,20 @@ namespace FaultTreeXl
             }
         }
 
+        public ObservableCollection<string> Choices { get; set; } = new ObservableCollection<string>
+        {
+            "Largest",
+            "Smallest",
+            "Geo. Mean",
+        };
+
+        private string choice = "Largest";
+        public string Choice
+        {
+            get => choice;
+            set => Changed(ref choice, value, nameof(Choice));
+        }
+
         private double _CCFRate = 0.10;
         public double CCFRate { get => _CCFRate; set => Changed(ref _CCFRate, value); }
 
@@ -28,9 +43,13 @@ namespace FaultTreeXl
         public ObservableCollection<GraphicItem> Nodes
         {
             get => _Nodes;
-            set 
-            { 
+            set
+            {
                 Changed(ref _Nodes, value);
+                Func<object, bool> theFilter = listItem => 
+                {
+                    return NodesOnly ? (listItem is Node) : true; 
+                };
                 CollectionViewSource.GetDefaultView(_Nodes).Filter = listItem => NodesOnly ? (listItem is Node) : true;
             }
         }
@@ -39,16 +58,39 @@ namespace FaultTreeXl
         public bool UpdateSource { get => _UpdateSource; set => Changed(ref _UpdateSource, value); }
 
         private bool _NodesOnly = true;
-        public bool NodesOnly 
-        { 
+        public bool NodesOnly
+        {
             get => _NodesOnly;
             set
-            { 
+            {
                 Changed(ref _NodesOnly, value);
                 if (_Nodes != null)
                     CollectionViewSource.GetDefaultView(_Nodes).Refresh();
             }
         }
+
+        private bool _everything;
+
+        public bool Everything
+        {
+            get => _everything;
+            set
+            {
+                Changed(ref _everything, value, nameof(Everything));
+                if (_Nodes != null)
+                {
+                    if (Everything)
+                    {
+                        if (App.Current.FindResource("GlobalFaultTreeModel") is FaultTreeModel model)
+                        {
+                            Nodes = new ObservableCollection<GraphicItem>(model.FaultTree);
+                        }
+                    }
+                    CollectionViewSource.GetDefaultView(_Nodes).Refresh();
+                }
+            }
+        }
+
 
         public Node Node2Update { get; set; }
 
@@ -76,13 +118,54 @@ namespace FaultTreeXl
             {
                 if ((parameters[0] is CCFWindowController controller) && (parameters[1] is ListView listView))
                 {
-                    foreach(GraphicItem item in listView.SelectedItems)
+                    // Multiple nodes should have been selected
+                    // decide which node to use as the basis for the CCF value
+                    // if the nodes selected are ORs, update all subnodes with the beta value
+                    // Update the CCF Node
+                    decimal choice = 0.0M;
+                    var graphicItems = listView.SelectedItems.OfType<GraphicItem>();
+                    var nodeqty = graphicItems.Count();
+
+                    if (nodeqty < 2)
                     {
-                        controller.Node2Update.Lambda = item.BetaFreeLambda * (decimal)controller.CCFRate;
-                        if (controller.UpdateSource)
-                        {
-                            item.Beta = controller.CCFRate * 100;
-                        }
+                        MessageBox.Show("Select more than one node");
+                        return;
+                    }
+
+                    var lambdas = graphicItems.Select(n => n.Lambda);
+                    //var nodes = graphicItems.OfType<Node>();
+                    //var ors = graphicItems.OfType<OR>();
+
+                    // Clear Beta from any selected nodes
+                    foreach (var n in controller.Nodes)
+                    {
+                        n.UpdateBeta(0);
+                    }
+
+                    switch (controller.Choice)
+                    {
+                        case "Largest":
+                            choice = lambdas.Max();
+                            break;
+                        case "Smallest":
+                            choice = lambdas.Min();
+                            break;
+                        case "Geo. Mean":
+                            var prodOfLambdas = lambdas.Aggregate((a, l) => a * l);
+                            var floatProdOfLambdas = (float)prodOfLambdas;
+                            var power = 1.0 / nodeqty;
+                            choice = (decimal)Math.Pow(floatProdOfLambdas, power);
+                            break;
+                        default:
+                            MessageBox.Show("Invalid choice detected");
+                            return;
+                    }
+                    controller.Node2Update.Lambda = choice * (decimal)controller.CCFRate;
+                    // Take beta from each of the selected nodes (if UpdateSource is selected)
+                    if (controller.UpdateSource)
+                    {
+                        foreach (var item in graphicItems)
+                            item.UpdateBeta(controller.CCFRate * 100);
                     }
                 }
             }

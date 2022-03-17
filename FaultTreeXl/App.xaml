@@ -11,6 +11,7 @@
 
         <local:OREdit x:Key="OrEditWindow" />
 
+        <local:AboutCommand x:Key="AboutCommand" />
         <local:EditCommand x:Key="OREditCommand"     />
         <local:DeleteCommand x:Key="ORDeleteCommand"     />
         <local:NodeAddCommand x:Key="NodeAddCommand"     />
@@ -34,13 +35,16 @@
         <!--<local:ChoosePartCommand x:Key="ChoosePartCommand"     />-->
         <local:UpdateNodeFromStandardCommand x:Key="UpdateNodeFromStandardCommand"     />
         <!--<local:CalcCCFCommand x:Key="CalcCCFCommand"     />-->
-        <local:ApplyCCFCommand x:Key="ApplyCCFCommand" />
+        <!--<local:ApplyCCFCommand x:Key="ApplyCCFCommand" />-->
         <local:ToggleForceIntegrationCommand x:Key="ToggleForceIntegrationCommand" />
         <!--<local:GetFailRateCommand x:Key="GetFailRateCommand" />-->
         <local:ShowCutSetsCommand x:Key="ShowCutSetsCommand" />
         <local:CCFCommand x:Key="CCFCommand" />
         <local:ShowCalcsCommand x:Key="ShowCalcsCommand" />
         <local:ShowSimpleCalcsCommand x:Key="ShowSimpleCalcsCommand" />
+        <local:ShowManualCalcsCommand x:Key="ShowManualCalcsCommand" />
+        <local:ShowManualLambdaCalcsCommand x:Key="ShowManualLambdaCalcsCommand" />
+        <local:ToggleCollapseCommand x:Key="ToggleCollapseCommand" />
 
         <local:DummyCommand x:Key="DummyCommand"     />
 
@@ -52,5 +56,7 @@
         <local:CancelSimulationCommand x:Key="CancelSimulationCommand" />
         <local:PTI8760Command x:Key="PTI8760Command" />
         <local:PTI4380Command x:Key="PTI4380Command" />
+
+        <local:LaunchSFFWindowCommand x:Key="LaunchSFFWindowCommand"/>
     </Application.Resources>
 </Application>

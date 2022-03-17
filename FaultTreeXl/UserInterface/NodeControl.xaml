@@ -7,10 +7,90 @@
              mc:Ignorable="d" d:DataContext="{StaticResource GlobalNode}" 
              d:DesignHeight="130" d:DesignWidth="100">
     <UserControl.Resources>
-       
+
         <Style TargetType="Rectangle" >
             <Setter Property="Fill" Value="Beige" />
             <Setter Property="Stroke" Value="Black" />
+        </Style>
+
+        <Style x:Key="ShowSimulation" TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=DataContext.ShowSimulationResults, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="True" >
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ShowCalculation" TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Visible"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=DataContext.ShowCalculationResults, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="False" >
+                    <Setter Property="Visibility" Value="Hidden" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ShowArchiture" TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=DataContext.ShowArchConstraints, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="True" >
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ShowLifeInfto"  TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ShowLifeInfo}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ShowTypeB" TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsA}" Value="False">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ShowTypeA" TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsA}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ShowProofTestInfo" TargetType="TextBlock" >
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=ProofTestEffectiveness}" Value="1" >
+                    <Setter Property="Visibility" Value="Hidden" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <!--<Style x:Key="HideProofTestInfo"  TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ShowLifeInfo}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>-->
+
+        <Style x:Key="ShowBetaInfo" TargetType="TextBlock" >
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=Beta}" Value="0">
+                    <Setter Property="Visibility" Value="Hidden" />
+                </DataTrigger>
+            </Style.Triggers>
+            <Setter Property="Visibility" Value="Visible" />
         </Style>
 
         <LinearGradientBrush x:Key="NodeNameRectangleGradient" EndPoint="0.5,1.5" StartPoint="0.5,0">
@@ -62,18 +142,12 @@
                 </Rectangle>
             </Border>
             <Line X1="50" Y1="65" X2="50" Y2="75" Stroke="Black"/>
-            <TextBlock Canvas.Left="80" FontFamily="Symbol" Canvas.Top="70"  Text="{Binding Path=Beta, StringFormat='b={0}%'}">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock" >
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=Beta}" Value="0">
-                                <Setter Property="Visibility" Value="Hidden" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                        <Setter Property="Visibility" Value="Visible" />
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
+            
+            <!-- Beta -->
+            <TextBlock Canvas.Left="5" FontFamily="Symbol" Canvas.Top="125"
+                       Text="{Binding Path=Beta, StringFormat='b={0}%'}" Style="{StaticResource ShowBetaInfo}" />
+
+            <!-- Node Symbol -->
             <Ellipse Name="NodeSymbol" Height="60" Width="60" Canvas.Left="20" Canvas.Top="70" Stroke="Black" >
                 <Ellipse.Style>
                     <Style TargetType="Ellipse" >
@@ -89,104 +163,74 @@
             </Ellipse>
             <Rectangle Name="NodeNameRectangle" Height="30" Width="90" Canvas.Left="5" Canvas.Top="85" Fill="{StaticResource NodeNameRectangleGradient}">
             </Rectangle>
-            <TextBlock  Margin="4,3,0,0" Height="15" Width="92" Text="{Binding Path=Description}" TextAlignment="Center" >
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock" >
-                        <Setter Property="Background" Value="Transparent" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=Description}" Value="No description" >
-                                <Setter Property="Background" Value="Yellow" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
+            
+            <!-- Node Information -->
+            <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Left" 
+                       Style="{StaticResource ShowCalculation}">
+                <Run Text="{Binding Path=Description, Mode=OneWay}" FontWeight="Bold" TextDecorations="Underline"/>
+                <LineBreak />
+                <Run >PFD:</Run><Run Text="{Binding Path=PFD,StringFormat=' {0:E2}', Mode=OneWay}"/>
+                <LineBreak />
+                <Run FontFamily="Symbol">l:</Run><Run Text="{Binding Path=BetaFreeLambda,StringFormat=' {0:E2}', Mode=OneWay}"/>/hr
+                <LineBreak/>
+                <Run >PTI:</Run><Run Text="{Binding Path=PTI,StringFormat=' {0:###,##0}', Mode=OneWay}"/> hrs
             </TextBlock>
-            <StackPanel Margin="15,30,0,0" Orientation="Horizontal" Width="90" HorizontalAlignment="Center">
-                <TextBlock Height="15" Text="l" FontFamily="Symbol" />
-                <TextBlock Height="15" Text="{Binding Path=BetaFreeLambda,StringFormat=': {0:E2}/hr'}"/>
-            </StackPanel>
-            <TextBlock Margin="5,15,0,0" Height="15" Width="90" Text="{Binding Path=PFD,StringFormat='PFD: {0:E2}'}" TextAlignment="Center" />
-            <TextBlock Margin="5,45,0,0" Height="15" Width="90" Text="{Binding Path=PTI,StringFormat='PTI: {0:N0} hrs'}" TextAlignment="Center" />
+            
+            <!-- Architectural Constraints --> 
+            <!--<TextBlock Margin="35,135,0,0" Height="15" Width="90" Text="{Binding Path=SFF,StringFormat='SFF: {0:P0}'}" TextAlignment="Left" />-->
+            <TextBlock Margin="70,65,0,0" Height="15" Width="90" Text="{Binding Path=ArchSIL,StringFormat='SIL: {0:N0}'}" TextAlignment="Left" />
+            <TextBlock Canvas.Left="5" Canvas.Top="115" Height="15" Width="10" Text="A" 
+                       TextAlignment="Left" Style="{StaticResource ShowTypeA}"/>
+            <TextBlock Height="15" Width="10" Text="B" TextAlignment="Left" 
+                       Canvas.Left="5" Canvas.Top="115"
+                       Style="{StaticResource ShowTypeB}"/>
+
+            <!-- Node Name -->
             <Border Canvas.Left="5" Canvas.Top="85" Height="30" Width="90">
                 <TextBlock Text="{Binding Path=Name}" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"/>
             </Border>
-            <TextBlock Canvas.Left="80" Canvas.Top="115"  Height="15" Width="100" Text="{Binding Path=ProofTestEffectiveness, StringFormat='c={0:P0}'}" TextAlignment="Left" >
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock" >
-                        <Setter Property="Visibility" Value="Visible" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=ProofTestEffectiveness}" Value="1" >
-                                <Setter Property="Visibility" Value="Hidden" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
+            
+            <!-- Prooftest effectiveness and Lifetime Info-->
+            <TextBlock Canvas.Left="80" Canvas.Top="115"  Height="15" Width="100" 
+                       Text="{Binding Path=ProofTestEffectiveness, StringFormat='c={0:P0}'}" 
+                       TextAlignment="Left" Style="{StaticResource ShowProofTestInfo}"/>
             <TextBlock Canvas.Left="80" Canvas.Top="130"  Height="15" Width="100" 
-                       Text="{Binding Path=LifeTime, StringFormat='L={0:###,##0 hrs}'}" TextAlignment="Left" >
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock" >
-                        <Setter Property="Visibility" Value="Visible" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=ProofTestEffectiveness}" Value="1" >
-                                <Setter Property="Visibility" Value="Hidden" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
-            <TextBlock Canvas.Left="72" Canvas.Top="73"  
-                       Height="15" Width="100" 
-                       Text="{Binding Path=ProofTestEffectiveness, StringFormat='PTE: {0:P0}'}" TextAlignment="Left">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Visibility"  Value="Hidden"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ShowLifeInfo}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
-            <TextBlock Canvas.Left="72" Canvas.Top="110" Height="15" Width="100" 
-                       Text="{Binding Path=LifeTime, StringFormat='T: {0:N0} hrs'}" TextAlignment="Left">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Visibility" Value="Hidden"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ShowLifeInfo}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
-            <TextBlock >
-                <Run >PFD:</Run><Run Text="{Binding Path=SimulatedPFD,StringFormat=' {0:E2}', Mode=OneWay}"/>
+                       Text="{Binding Path=LifeTime, StringFormat='L={0:###,##0 hrs}'}" 
+                       TextAlignment="Left" Style="{StaticResource ShowProofTestInfo}"/>
+            
+            <!-- Imperfect Proof Testing Lifetime -->
+            <!--<TextBlock Canvas.Left="72" Canvas.Top="110" Height="15" Width="100" 
+                       Text="{Binding Path=LifeTime, StringFormat='T: {0:N0} hrs'}" TextAlignment="Left"
+                       Style="{StaticResource HideProofTestInfo}"/>-->
+
+            <!-- Architectural Constraints Info -->
+            <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Center" Style="{StaticResource ShowArchiture}">
+                <Run Text="{Binding Path=Description, Mode=OneWay}" FontWeight="Bold" TextDecorations="Underline"/>
+                <LineBreak />
+                <Run FontFamily="Symbol" Text="l"/>
+                <Run BaselineAlignment="Subscript" FontSize="8" Text="Total"/><Run Text=":"/>
+                <Run Text="{Binding Path=TotalFailRate,StringFormat=' {0:E2}/hr', Mode=OneWay}"/>
+                <LineBreak />
+                <Run FontFamily="Symbol" Text="l"/><Run BaselineAlignment="Subscript" FontSize="8" Text="DU"/><Run Text=":"/>
+                <Run Text="{Binding Path=BetaFreeLambda,StringFormat=' {0:E2}/hr', Mode=OneWay}" />                
                 <LineBreak/>
+                <Run Text="SFF:"/><Run Text="{Binding Path=SFF,StringFormat=' {0:P1}', Mode=OneWay}"/>
+            </TextBlock>
+            
+            <TextBlock Margin="0,65,0,0" Text="{Binding FailureCount, StringFormat=' {0:###,##0}'}" Style="{StaticResource ShowSimulation}"/>
+
+            <!-- Simulation Info-->
+            <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Center" Style="{StaticResource ShowSimulation}">
+                <Run Text="{Binding Path=Description, Mode=OneWay}" FontWeight="Bold" TextDecorations="Underline"/>
+                <LineBreak />
+                <Run >PFD:</Run><Run Text="{Binding Path=SimulatedPFD,StringFormat=' {0:E2}', Mode=OneWay}"/>
+                <LineBreak />
                 <Run FontFamily="Symbol">l:</Run><Run Text="{Binding Path=SimulatedFailureRate,StringFormat=' {0:E2}', Mode=OneWay}"/> /hr
                 <LineBreak/>
                 <Run >MDT:</Run><Run Text="{Binding Path=SimulatedMeanDowntime,StringFormat=' {0:###,##0}', Mode=OneWay}"/> hrs
-                <LineBreak/>
-                <Run >Events:</Run><Run Text="{Binding Path=FailureCount,StringFormat=' {0:###,##0}', Mode=OneWay}"/>
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Visibility" Value="Hidden"/>
-                        <Setter Property="Canvas.Left" Value="5" />
-                        <Setter Property="Canvas.Top" Value="145" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=DataContext.ShowSimulationResults, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="True" >
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Path=Name}" Value="CCF" >
-                                <Setter Property="Canvas.Left" Value="110" />
-                                <Setter Property="Canvas.Top" Value="12" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
             </TextBlock>
+
+
         </Canvas>
     </Grid>
 </UserControl>

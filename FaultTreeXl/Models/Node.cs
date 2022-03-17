@@ -32,7 +32,10 @@ namespace FaultTreeXl
                 }
                 return result;
             }
-
+        }
+        internal override void UpdateBeta(double v)
+        {
+            Beta=v;
         }
     }
 }

@@ -27,14 +27,24 @@ namespace FaultTreeXl
             if ((parameter is FaultTreeModel ftm))
             {
                 const short visSectionObject= (short) VisSectionIndices.visSectionObject;
-                const short visSectionParagraph = (short)VisSectionIndices.visSectionParagraph;
+                const short visSectionCharacter = (short)VisSectionIndices.visSectionCharacter;
+                //const short visSectionParagraph = (short)VisSectionIndices.visSectionParagraph;
+                const short visCharacterFont = (short)VisCellIndices.visCharacterFont;
                 const short visRowPage = (short) VisRowIndices.visRowPage;
                 const short visRowPrintProperties = (short)VisRowIndices.visRowPrintProperties;
                 const short visPageWidth = (short) VisCellIndices.visPageWidth;
                 const short visPageHeight = (short)VisCellIndices.visPageHeight;
                 const short visPrintPropertiesPageOrientation = (short)VisCellIndices.visPrintPropertiesPageOrientation;
                 const short visFitPage = (short) VisWindowFit.visFitPage;
-                const short visHorzAlign = (short)VisCellIndices.visHorzAlign;
+                //const short visHorzAlign = (short)VisCellIndices.visHorzAlign;
+                const short visRowFill = (short)VisRowIndices.visRowFill;
+                const short visFillPattern = (short)VisCellIndices.visFillPattern;
+                const short visRowGradientProperties = (short)VisRowIndices.visRowGradientProperties;
+                const short visFillGradientEnabled = (short)VisCellIndices.visFillGradientEnabled;
+                const short visRowLine = (short)VisRowIndices.visRowLine;
+                //const short visRowGradientProperties = (short)VisRowIndices.visRowGradientProperties;
+                const short visLinePattern = (short)VisCellIndices.visLinePattern;
+                const short visLineGradientEnabled = (short)VisCellIndices.visLineGradientEnabled;
 
                 // Create a new visio application with a document and a single page
                 Application theApp = new Application() { Visible = true, };
@@ -119,6 +129,19 @@ namespace FaultTreeXl
                         TextRect = page.DrawRect(graphic, 10, 70, width:80, height:30);
                         TextRect.Text = $"{graphic.Name}";
                         TextRect.Characters.CharProps[(short)VisCellIndices.visCharacterSize] = 8;
+                        // show beta factor if included
+                        if (theNode.Beta > 0.0)
+                        {
+                            var BetaRect = page.DrawRect(graphic, 65, 55, width: 45, height: 10);
+                            BetaRect.Characters.CharProps[(short)VisCellIndices.visCharacterSize] = 6;
+                            BetaRect.CellsSRC[visSectionObject, visRowFill, visFillPattern].FormulaU="0";
+                            BetaRect.CellsSRC[visSectionObject, visRowGradientProperties, visFillGradientEnabled].FormulaU = "FALSE";
+                            BetaRect.CellsSRC[visSectionCharacter, 0, visCharacterFont].FormulaU = "2";
+                            BetaRect.CellsSRC[visSectionObject, visRowLine, visLinePattern].FormulaU = "0";
+                            BetaRect.CellsSRC[visSectionObject, visRowGradientProperties, visLineGradientEnabled].FormulaU = "FALSE";
+                            var beta = (theNode.Beta/100).ToString("P0");
+                            BetaRect.Text = $"b={beta}";
+                        }
                     }
                     else
                     {

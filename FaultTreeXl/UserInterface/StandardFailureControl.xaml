@@ -5,19 +5,29 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:FaultTreeXl"
              mc:Ignorable="d" d:DataContext="{DynamicResource DataContext}"
-             d:DesignHeight="25" d:DesignWidth="200">
+             d:DesignHeight="25" d:DesignWidth="300">
     <UserControl.Resources>
-        <local:StandardFailure x:Key="DataContext" Name="MSR 127" Type="Safety Relay" Rate="1.00E-6"/>
+        <local:StandardFailure x:Key="DataContext" Name="MSR 127" Type="Safety Relay" Rate="1.00E-7" TotalRate="1.00E-06"/>
     </UserControl.Resources>
     <Grid>
         <StackPanel Orientation="Horizontal"
-                MouseDown="STD_MouseDown" 
-                DragEnter="STD_DragEnter" 
-                DragOver="STD_DragOver"
-                DragLeave="STD_DragLeave">
+                    MouseDown="STD_MouseDown" 
+                    DragEnter="STD_DragEnter" 
+                    DragOver="STD_DragOver"
+                    DragLeave="STD_DragLeave"
+                    AllowDrop="True"
+                    Drop="StackPanel_Drop"
+                    >
+            <StackPanel.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Name="mnuEdit" Header="Edit" Click="mnuEdit_Click"/>
+                    <MenuItem Name="mnuAdd" Header="Add" Click="mnuAdd_Click"/>
+                    <MenuItem Name="mnuDelete" Header="Delete" Click="mnuDelete_Click"/>
+                </ContextMenu>
+            </StackPanel.ContextMenu>
             <TextBlock Text="{Binding Type}" Width="80" Margin="0,0,5,0"/>
             <TextBlock Text="{Binding Name}" Width="140" Margin="5,0,5,0"/>
-            <TextBlock Text="{Binding Rate, StringFormat={}{0:E2}}" Margin="5,0,5,0"/>
+            <TextBlock Text="{Binding Path=Rate, StringFormat='{}{0:E2}'}" Margin="5,0,5,0" />
         </StackPanel>
     </Grid>
 </UserControl>

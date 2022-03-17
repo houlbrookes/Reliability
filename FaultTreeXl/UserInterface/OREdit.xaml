@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FaultTreeXl" d:DataContext="{StaticResource GlobalOR}"
         mc:Ignorable="d" Closing="Window_Closing"
-        Title="OR" Height="225" Width="400" ResizeMode="NoResize" ShowInTaskbar="False" SizeToContent="Height" WindowStartupLocation="CenterOwner">
+        Title="OR" Height="275" Width="400" ResizeMode="NoResize" ShowInTaskbar="False" SizeToContent="Height" WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}">
             <Setter Property="Margin" Value="0,2,40,2" />
@@ -43,6 +43,8 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
             <RowDefinition Height="25"/>
             <RowDefinition Height="25"/>
             <RowDefinition Height="25"/>
@@ -95,6 +97,10 @@
                   />
         <TextBlock Grid.Row="7" Grid.Column="0" Text="Make/Model"/>
         <TextBox  Grid.Row="7" Grid.Column="1" Text="{Binding MakeModel}" Style="{StaticResource NodesOnly}"/>
-        <Button Grid.Row="8" Grid.Column="1" Content="Close" Width="150" Height="20" HorizontalAlignment="Right" Margin="0,0,0,0" IsDefault="True" IsCancel="true"/>
+        <TextBlock Grid.Row="8" Grid.Column="0" Text="Total λ"/>
+        <TextBox  Grid.Row="8" Grid.Column="1" Text="{Binding TotalFailRate, StringFormat='{}{0:E2}'}" Style="{StaticResource NodesOnly}"/>
+        <TextBlock Grid.Row="9" Grid.Column="0" Text="Type A or B"/>
+        <CheckBox  Grid.Row="9" Grid.Column="1" IsChecked="{Binding IsA}">Is Type A</CheckBox>
+        <Button Grid.Row="10" Grid.Column="1" Content="Close" Width="150" Height="20" HorizontalAlignment="Right" Margin="0,0,0,0" IsDefault="True" IsCancel="true"/>
     </Grid>
 </Window>

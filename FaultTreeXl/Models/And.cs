@@ -53,6 +53,73 @@ namespace FaultTreeXl
             set => base.Lambda = value; // dummy 
         }
 
+        public override decimal BetaFreeLambda
+        {
+            get => CutSets.Sum(cs => cs.Lambda);
+            set => base.BetaFreeLambda = value;
+        }
+
+        public override int ArchSIL => Nodes.Any(n => !n.IsCCF) ? Math.Min(Nodes.Where(n => !n.IsCCF).Sum(n => n.ArchSIL),4):1;
+
+        public override (string, string) FormulaLambdaString()
+        {
+            // a list of formula strings for each node 
+            var pfdStrings = from node in Nodes
+                             let otherNodes = Nodes.Where(n => n != node)
+                             let otherPFD = otherNodes.Select(n => n.FormulaString().Item2)
+                             let pfdFormula = string.Join(" + ", otherPFD)
+                             select $"λ_{node.Name} × {pfdFormula}";
+
+            return ("AND formula", string.Join(" + ", pfdStrings));
+        }
+
+        public override (string, string) ValuesLambdaString()
+        {
+            // a list of formula strings for each node 
+            var pfdStrings = from node in Nodes
+                             let otherNodes = Nodes.Where(n => n != node)
+                             let otherPFD = otherNodes.Select(n => n.ValuesString().Item2)
+                             let pfdFormula = string.Join(" + ", otherPFD)
+                             select $"{node.BetaFreeLambda.FormatDouble()} × {pfdFormula}";
+
+            return ("AND formula", string.Join(" + ", pfdStrings));
+        }
+
+        public override (string, string) TotalLambdaString()
+        {
+            return base.TotalLambdaString();
+        }
+
+        internal override void UpdateBeta(double v)
+        {
+            foreach(var node in Nodes) node.UpdateBeta(v);
+        }
+
+        public bool hasIdenticalLegs()
+        {
+            if (Nodes.Count() > 0)
+            {
+                var n = Nodes.First();
+                var l = n.BetaFreeLambda;
+                var T = n.PTI;
+                var L = n.LifeTime;
+                var b = n.Beta;
+                var c = n.ProofTestEffectiveness;
+                return Nodes.All(node => node.BetaFreeLambda == l && node.PTI == T && node.LifeTime == L && node.Beta == b && node.ProofTestEffectiveness == c);
+            }
+            else
+                return false;
+        }
+
+        public bool isPerfectProof()
+        {
+            if (Nodes.Count() > 0)
+            {
+                return Nodes.All(n => n.ProofTestEffectiveness == 1);
+            }
+            else
+                return false;
+        }
     }
 
     public partial class AND

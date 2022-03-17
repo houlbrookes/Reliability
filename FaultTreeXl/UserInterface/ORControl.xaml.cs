@@ -97,7 +97,9 @@ namespace FaultTreeXl
                     {
                         Name = $"Node {ftm.NextNodeName("Node") + 1}",
                         Description = theStdFail.Name,
-                        Lambda = theStdFail.Rate
+                        Lambda = theStdFail.Rate,
+                        TotalFailRate = theStdFail.TotalRate,
+                        IsA = theStdFail.IsA,
                     };
                     (DataContext as OR).Nodes.Add(theNewNode);
                     ftm.ReDrawRootNode();

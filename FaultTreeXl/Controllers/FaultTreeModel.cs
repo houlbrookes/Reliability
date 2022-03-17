@@ -23,7 +23,56 @@ namespace FaultTreeXl
         bool _resetEachSimulation = false;
         public bool ResetEachSimulation { get => _resetEachSimulation; set => Changed(ref _resetEachSimulation, value, updateDirty: false); }
         bool _showSimulationResults = false;
-        public bool ShowSimulationResults { get => _showSimulationResults; set => Changed(ref _showSimulationResults, value, updateDirty: false); }
+        public bool ShowSimulationResults
+        {
+            get => _showSimulationResults;
+            set
+            {
+                Changed(ref _showSimulationResults, value, updateDirty: false);
+                if (value)
+                {
+                    ShowArchConstraints = false;
+                    Notify(nameof(ShowArchConstraints));
+                    //ShowCalculationResults = false;
+                }
+                Notify(nameof(ShowCalculationResults));
+            }
+        }
+
+        //private bool _showCalculationResults;
+
+        public bool ShowCalculationResults
+        {
+            get => !(ShowArchConstraints || ShowSimulationResults);
+            //set
+            //{
+            //    Changed(ref _showCalculationResults, value, nameof(ShowCalculationResults));
+            //    if (value)
+            //    {
+            //        ShowArchConstraints = false;
+            //        ShowSimulationResults = false;
+            //    }
+            //}
+        }
+
+
+        private bool _showArchContraints;
+
+        public bool ShowArchConstraints
+        {
+            get => _showArchContraints;
+            set
+            {
+                Changed(ref _showArchContraints, value, nameof(ShowArchConstraints));
+                if (value)
+                {
+                    ShowSimulationResults = false;
+                    Notify(nameof(ShowSimulationResults));
+                    //ShowCalculationResults = false;
+                }
+                Notify(nameof(ShowCalculationResults));
+            }
+        }
 
 
         private string _status = "Started";
@@ -53,7 +102,8 @@ namespace FaultTreeXl
         private GraphicItem _rootNode = null;
         public GraphicItem RootNode { get => _rootNode; set => Changed(ref _rootNode, value); }
 
-        public int SILLevelPFD { get => RootNode.PFD < (decimal)1E-04 ? 4 : RootNode.PFD < (decimal)1E-03 ? 3 : RootNode.PFD < (decimal)1E-02 ? 2 : RootNode.PFD < (decimal)1E-01 ? 1 : 0; }
+        public int SILLevelPFD { get => RootNode.PFD < 1E-04M ? 4 : RootNode.PFD < 1E-03M ? 3 : RootNode.PFD < 1E-02M ? 2 : RootNode.PFD < 1E-01M ? 1 : 0; }
+        public int SILLevelPFH { get => RootNode.Lambda < 1E-8M ? 4 : RootNode.Lambda < 1E-7M ? 3 : RootNode.Lambda < 1E-6M ? 2 : RootNode.Lambda < 1E-5M ? 1 : 0; }
 
         private GraphicItem _highlightedNode = null;
         [XmlIgnore]
@@ -118,6 +168,15 @@ namespace FaultTreeXl
             }
         }
 
+        public void SaveStandardFailures()
+        {
+            string fileName = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "StandardParts.xml");
+            using (var streamWriter = new StreamWriter(fileName))
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(ObservableCollection<StandardFailure>));
+                serializer.Serialize(streamWriter, FailureRates);
+            }
+        }
 
         private void DrawGraphics(GraphicItem graphic)
         {
@@ -125,10 +184,12 @@ namespace FaultTreeXl
             graphic.PropertyChanged += Graphic_PropertyChanged;
 
             FaultTree.Add(graphic);
-            foreach (GraphicItem n in graphic.Nodes)
-            {
-                DrawGraphics(n);
-            }
+            // don't put the subnodes of a collapsed node into the displ
+            if (!graphic.Collapsed)
+                foreach (GraphicItem n in graphic.Nodes)
+                {
+                    DrawGraphics(n);
+                }
         }
 
         private void Graphic_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -140,6 +201,7 @@ namespace FaultTreeXl
                  || e.PropertyName == nameof(graphicItem.PTI))
                 {
                     Notify(nameof(SILLevelPFD));
+                    Notify(nameof(SILLevelPFH));
                     Notify(nameof(DifferentPTIs));
 
                 }
@@ -188,7 +250,6 @@ namespace FaultTreeXl
 
         public FaultTreeModel()
         {
-
             OR oR1 = new OR { Name = "OR 1", Description = "Root Node" };
 
             RootNode = oR1;
@@ -239,7 +300,7 @@ namespace FaultTreeXl
                 foreach (var node in nodes) node.CalculateNextEvent(clock, model.TheRadomBase);
 
                 const int cancellationSteps = 1000;
-                for (var iteration = 0; iteration < model.SimulationIterations/cancellationSteps; iteration++)
+                for (var iteration = 0; iteration < model.SimulationIterations / cancellationSteps; iteration++)
                 {
                     if (simulationProcess.CancellationPending)
                     {
