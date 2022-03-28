@@ -142,7 +142,11 @@
             <TextBlock Margin="65,65,0,0" Height="15" Width="90" Text="{Binding Path=ArchSIL,StringFormat='SIL: {0:N0}'}" TextAlignment="Left"/>
 
             <Border Canvas.Left="5" Canvas.Top="85" Height="30" Width="90">
-                <TextBlock Text="{Binding Path=Name}" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding Path=Name}" 
+                         TextAlignment="Center" 
+                         VerticalAlignment="Center" 
+                         HorizontalAlignment="Center" 
+                         TextWrapping="Wrap"/>
             </Border>
 
             <Line X1="50" Y1="119" X2="50" Y2="135" Stroke="Black" >
@@ -160,7 +164,7 @@
                     </Style>
                 </Line.Style>
             </Line>
-            <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Center" Style="{StaticResource ShowSimulation}">
+            <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Left" Style="{StaticResource ShowSimulation}">
                 <Run Text="{Binding Path=Description, Mode=OneWay}" FontWeight="Bold" TextDecorations="Underline"/>
                 <LineBreak />
                 <Run >PFD:</Run><Run Text="{Binding Path=SimulatedPFD,StringFormat=' {0:E2}', Mode=OneWay}"/>

@@ -36,5 +36,24 @@ namespace FaultTreeXl
             this.DialogResult = true;
             this.Close();
         }
+
+        private void AddFailureMode(object sender, RoutedEventArgs e)
+        {
+            Failure2Edit.FailureModes.Add(new StandardFailure.FailureMode { Name="New Mode", Proportion=0.5 });
+        }
+
+        private void DeleteItem(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem theMenu)
+            {
+                if (Failure2Edit != null)
+                {
+                    if (theMenu.DataContext is StandardFailure.FailureMode fmode)
+                    {
+                        Failure2Edit.FailureModes.Remove(fmode);
+                    }
+                }
+            }
+        }
     }
 }

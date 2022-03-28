@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
@@ -88,7 +89,15 @@ namespace FaultTreeXl
             }
         }
 
-        public string FormulaName { get => _name.Replace("_", "").Replace(" ", "").Replace("+", ""); }
+        public string FormulaName
+        {
+            get
+            {
+                var reg = new Regex(@"\W");
+                return "x" + reg.Replace(_name, "_");
+            }
+
+        }
 
         /// <summary>
         /// Identifies node as Common Cause Factor
@@ -109,8 +118,19 @@ namespace FaultTreeXl
         private decimal _totalFailRate;
         public decimal TotalFailRate
         {
-            get => _totalFailRate>0? _totalFailRate : BetaFreeLambda;
-            set => Changed(ref _totalFailRate, value, nameof(TotalFailRate));
+            get => _totalFailRate > 0 ? _totalFailRate : BetaFreeLambda;
+            set
+            {
+                Changed(ref _totalFailRate, value, nameof(TotalFailRate));
+                Notify(nameof(SFF));
+                Notify(nameof(ArchSIL));
+                var p = Parent;
+                while (p != null)
+                { 
+                    p?.Notify(nameof(ArchSIL));
+                    p = p.Parent;
+                }
+            }
         }
 
         private bool _isA;
@@ -118,10 +138,21 @@ namespace FaultTreeXl
         public bool IsA
         {
             get => _isA;
-            set => Changed(ref _isA, value, nameof(IsA));
+            set
+            {
+                Changed(ref _isA, value, nameof(IsA));
+                Notify(nameof(SFF));
+                Notify(nameof(ArchSIL));
+                var p = Parent;
+                while (p != null)
+                {
+                    p?.Notify(nameof(ArchSIL));
+                    p = p.Parent;
+                }
+            }
         }
 
-        public double SFF { get => (double)(1M-BetaFreeLambda/TotalFailRate); }
+        public double SFF { get => (double)(1M - BetaFreeLambda / TotalFailRate); }
         public virtual int ArchSIL
         {
             get
@@ -272,8 +303,8 @@ namespace FaultTreeXl
         {
             if (Beta > 0)
             {
-                if (ProofTestEffectiveness>0)
-                return ("Standard 1oo1 DU Lambda β", $"(1-β).λ_{FormulaName}");
+                if (ProofTestEffectiveness > 0)
+                    return ("Standard 1oo1 DU Lambda β", $"(1-β).λ_{FormulaName}");
                 else
                     return ("Standard 1oo1 DU Lambda β", $"(1-β).λ_{FormulaName}");
             }
@@ -301,11 +332,11 @@ namespace FaultTreeXl
             {
                 if (ProofTestEffectiveness == 1)
                 {
-                    return ("Standard 1oo1 DU", $"((1-{Beta/100}) × {BetaFreeLambda.FormatDouble()} × {PTI})/2");
+                    return ("Standard 1oo1 DU", $"((1-{Beta / 100}) × {BetaFreeLambda.FormatDouble()} × {PTI})/2");
                 }
                 else
                 {
-                    return ("", $"({ProofTestEffectiveness} × (1-{Beta/100.0}) × {BetaFreeLambda.FormatDouble()} × {PTI})/2");
+                    return ("", $"({ProofTestEffectiveness} × (1-{Beta / 100.0}) × {BetaFreeLambda.FormatDouble()} × {PTI})/2");
                 }
             }
         }
@@ -329,7 +360,7 @@ namespace FaultTreeXl
 
         public virtual (string, string) TotalLambdaString()
         {
-            return ("From Calculated PFD", $"λ_{FormulaName}={BetaFreeLambda.FormatDouble()} × {Beta/100D}");
+            return ("From Calculated PFD", $"λ_{FormulaName}={BetaFreeLambda.FormatDouble()} × {Beta / 100D}");
         }
 
         /// <summary>

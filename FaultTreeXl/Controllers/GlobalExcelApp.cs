@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using forms=System.Windows.Forms;
 using Microsoft.Office.Interop.Excel;
 
 namespace FaultTreeXl
@@ -70,8 +71,17 @@ namespace FaultTreeXl
 
         public static XLRange AssignValue(this XLRange thisRange, object theValue)
         {
-            thisRange.Range.Value = theValue;
-            return thisRange;
+            try
+            {
+                thisRange.Range.Value = theValue;
+                return thisRange;
+
+            }
+            catch (Exception e)
+            {
+                forms.MessageBox.Show($"{e.Message} when assigning: {theValue}", "Error in globalExcelApp.AssignValue");
+                return thisRange;
+            }
         }
 
         public static XLRange Bold(this XLRange thisRange)
@@ -133,11 +143,35 @@ namespace FaultTreeXl
 
         public static XLRange NameRange(this XLRange thisRange, string rangeName)
         {
-            thisRange.Range.Name = rangeName;
-            return thisRange;
+            try
+            {
+                // check to see if this name already exists
+                var listOfNames = from Name namedRange in TheWorkbook.Names
+                        select namedRange;
+                var found = listOfNames.FirstOrDefault(n => n.Name == rangeName);
+                if (found != null)
+                    found.Delete();
+            }
+            catch (Exception e)
+            {
+                forms.MessageBox.Show($"{e.Message} when deleting an existing named range", "Error in GlobalExcelApp.NameRange");
+                return thisRange;
+            }
+
+            try
+            {
+                thisRange.Range.Name = rangeName;
+                return thisRange;
+
+            }
+            catch (Exception e)
+            {
+                forms.MessageBox.Show($"{e.Message} when assigning {rangeName}", "Error in GlobalExcelApp.NameRange");
+                return thisRange;
+            }
         }
 
-        public static string addr(this (int, int) thisAddress )
+        public static string addr(this (int, int) thisAddress)
         {
             return GetAddress(thisAddress.Item1, thisAddress.Item2);
         }

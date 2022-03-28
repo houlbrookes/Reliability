@@ -7,7 +7,8 @@
              mc:Ignorable="d" DataContextChanged="UserControl_DataContextChanged"
              Height="110" Width="100">
     <UserControl.Resources>
-        <local:AND x:Key="DataModel" />
+        
+        <local:AND x:Key="DataModel"/>
 
         <Style x:Key="ShowSimulation" TargetType="TextBlock">
             <Setter Property="Visibility" Value="Hidden"/>
@@ -28,9 +29,9 @@
         </Style>
 
     </UserControl.Resources>
-
+    <!-- Note that the TestValue property of DataModel has been set on the next object in the hierarchy -->
     <Grid d:DataContext="{StaticResource DataModel}">
-        <Canvas AllowDrop="True" DragEnter="Canvas_DragEnter" DragOver="Canvas_DragOver" DragLeave="Canvas_DragLeave" Drop="Canvas_Drop" MouseMove="Canvas_MouseMove">
+        <Canvas d:DataContext="{Binding TestValue}" AllowDrop="True" DragEnter="Canvas_DragEnter" DragOver="Canvas_DragOver" DragLeave="Canvas_DragLeave" Drop="Canvas_Drop" MouseMove="Canvas_MouseMove">
             <Canvas.InputBindings>
                 <MouseBinding Gesture="LeftDoubleClick" Command="{StaticResource OREditCommand}" CommandParameter="{Binding}" />
             </Canvas.InputBindings>
@@ -99,24 +100,6 @@
                     </Style>
                 </Path.Style>
             </Path >
-            <!--<TextBlock Margin="3,2,0,0" Height="15" Width="95" Text="{Binding Path=Description}" TextAlignment="Center">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock" >
-                        <Setter Property="Background" Value="Transparent" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Path=Description}" Value="No description" >
-                                <Setter Property="Background" Value="Yellow" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>-->
-            <!--<TextBlock Margin="5,15,0,0" Height="15" Width="95" Text="{Binding Path=PFD,StringFormat='PFD: {0:E2}'}" TextAlignment="Center" />
-            <StackPanel Margin="15,30,0,0" Orientation="Horizontal" Width="90" HorizontalAlignment="Center">
-                <TextBlock Height="15" Text="l" FontFamily="Symbol" />
-                <TextBlock Height="15" Text="{Binding Path=Lambda,StringFormat=': {0:E2}/hr'}"/>
-            </StackPanel>
-            <TextBlock Margin="5,45,0,0" Height="15" Width="95" Text="{Binding Path=MDT,StringFormat='MDT: {0:N0} hrs'}" TextAlignment="Center" />-->
             <Rectangle Height="30" Width="90" Canvas.Left="5" Canvas.Top="85" Stroke="Black">
                 <Rectangle.Fill>
                     <LinearGradientBrush EndPoint="0.5,1.5" StartPoint="0.5,0">
@@ -166,7 +149,7 @@
                 </Line.Style>
 
             </Line>
-            <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Center" Style="{StaticResource ShowSimulation}">
+            <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Left" Style="{StaticResource ShowSimulation}">
                 <Run Text="{Binding Path=Description, Mode=OneWay}" FontWeight="Bold" TextDecorations="Underline"/>
                 <LineBreak />
                 <Run >PFD:</Run><Run Text="{Binding Path=SimulatedPFD,StringFormat=' {0:E2}', Mode=OneWay}"/>

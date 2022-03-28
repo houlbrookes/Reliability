@@ -26,12 +26,12 @@
             <local:ANDControl DataContext="{Binding}"/>
         </DataTemplate>
     </Window.Resources>
-    <Grid>
+    <Grid Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
-        <DockPanel>
+        <DockPanel Name="MainDockPanel">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="File">
                     <MenuItem Header="Load" Command="{StaticResource LoadCommand}" CommandParameter="{Binding}"/>
@@ -76,35 +76,66 @@
                     <MenuItem Header="About" Command="{StaticResource AboutCommand}" />
                 </MenuItem>
             </Menu>
-            <Grid  >
+            <ToolBar DockPanel.Dock="Top" HorizontalAlignment="Right">
+                <TextBlock Text="OR" MouseDown="OR_MouseDown" Margin="10,0,0,0"/>
+                <TextBlock Text="AND" MouseDown="OR_MouseDown" Margin="10,0,0,0"/>
+                <TextBlock Text="Node" MouseDown="OR_MouseDown" Margin="10,0,0,0"/>
+                <TextBlock Text="CCF" MouseDown="OR_MouseDown" Margin="10,0,0,0"/>
+            </ToolBar>
+            <Grid >
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="300" />
-                    <ColumnDefinition Width="3"/>
+                    <ColumnDefinition Width="320" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Margin="5,0,0,0" FontWeight="Bold">Component</TextBlock>
-                        <TextBlock Margin="30,0,0,0" FontWeight="Bold">Description</TextBlock>
-                        <TextBlock Margin="80,0,0,0" FontWeight="Bold">Failure Rate</TextBlock>
-                    </StackPanel>
                     <!-- Display for the Standard Failiure Rates -->
-                    <ListBox ItemsSource="{Binding FailureRates}" >
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <local:StandardFailureControl DataContext="{Binding}" />
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,5,0">
+                <ListBox ItemsSource="{Binding FailureRates}" VerticalAlignment="Top">
+                            <ListBox.Template>
+                                <ControlTemplate>
+                                    <DockPanel LastChildFill="True">
+                                    <Grid DockPanel.Dock="Top" Height="20">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="72"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="25"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Grid.Column="0" FontWeight="Bold">Component</Label>
+                                        <Label Grid.Column="1" FontWeight="Bold" Margin="5,0,0,0">Description</Label>
+                                        <Label Grid.Column="2" FontWeight="Bold" Margin="5,0,0,0">Fail Rate</Label>
+                                    </Grid>
+                                    <ItemsPresenter Grid.Row="1" ></ItemsPresenter>
+                                </DockPanel>
+                                </ControlTemplate>
+                            </ListBox.Template>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                <local:StandardFailureControl/>
                             </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel>
-                <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Left" Background="Gray" Margin="0,0,0,0"/>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                </ScrollViewer>
+                <GridSplitter Grid.Column="0" Width="5" Background="Gray" />
                 <!-- Fault Tree in a Scroll Viewer -->
-                <ScrollViewer Grid.Column="2" Name="TheScrollViewer" VerticalAlignment="Top" Margin="0,0,0,0" HorizontalContentAlignment="Center" HorizontalScrollBarVisibility="Visible" 
-                              PreviewMouseWheel="TheScrollViewer_PreviewMouseWheel" >
-                    <ItemsControl ItemsSource="{Binding Path=FaultTree}" ItemTemplateSelector="{StaticResource GraphicItemTemplateSelector}">
+                <ScrollViewer Grid.Column="1" 
+                              Name="TheScrollViewer" 
+                              VerticalAlignment="Top" 
+                              HorizontalContentAlignment="Center" 
+                              HorizontalScrollBarVisibility="Visible" 
+                              PreviewMouseWheel="TheScrollViewer_PreviewMouseWheel" Grid.ColumnSpan="2" Grid.RowSpan="2" >
+                    <ItemsControl ItemsSource="{Binding Path=FaultTree}" 
+                                  ItemTemplateSelector="{StaticResource GraphicItemTemplateSelector}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <Canvas Width="{Binding Path=Width}" Height="{Binding Height}" Background="LightGray">
+                                <Canvas Width="{Binding Path=Width}" 
+                                        HorizontalAlignment="Center" 
+                                        MinHeight="{Binding ElementName=MainGrid, Path=ActualHeight, Mode=OneWay}"
+                                        Height="{Binding Height}" 
+                                        Background="LightGray">
                                     <Canvas.LayoutTransform>
                                         <ScaleTransform CenterX="0" CenterY="0" ScaleX="{Binding Scale}" ScaleY="{Binding Scale}" />
                                     </Canvas.LayoutTransform>
@@ -120,9 +151,9 @@
                     </ItemsControl>
                 </ScrollViewer>
                 <!-- Warnings Box -->
-                <Border Margin="10,185,0,0" Grid.Column="2" BorderBrush="Black" BorderThickness="1" Width="140" Height="50" 
+                <Border Margin="9.974,176.994,0,0" Grid.Column="2" BorderBrush="Black" BorderThickness="1" Width="140" Height="50" 
                         CornerRadius="5" Background="Yellow" 
-                        VerticalAlignment="Top" HorizontalAlignment="Left">
+                        VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Row="1">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Visibility" Value="Hidden"/>
@@ -138,9 +169,9 @@
                     </TextBlock>
                 </Border>
                 <!-- Summary & Options Box -->
-                <Border Margin="10,10,0,0" Grid.Column="2" BorderBrush="Black" BorderThickness="1" Width="140" Height="170" 
+                <Border Margin="9.974,1.994,0,0" Grid.Column="2" BorderBrush="Black" BorderThickness="1" Width="140" Height="170" 
                         CornerRadius="5" Background="LightGreen"
-                        VerticalAlignment="Top" HorizontalAlignment="Left">
+                        VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Row="1">
                     <StackPanel>
                         <TextBlock Padding="5">
                             <Run>PFD=</Run>

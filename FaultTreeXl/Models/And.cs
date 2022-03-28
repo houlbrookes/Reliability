@@ -17,6 +17,17 @@ namespace FaultTreeXl
         public override string NodeType => "AND";
 
         [XmlIgnore]
+        public AND TestValue {
+            get => new AND() { Name = "AND1", Description = "Test Description", Beta=10.0, 
+                               Nodes= new ObservableCollection<GraphicItem> 
+                               { 
+                                    new Node { Name="Node1", Lambda=1E-06M, PTI=8760, Beta=10.0, ProofTestEffectiveness=1.0M, LifeTime=87600, TotalFailRate=1E-05M, IsA=true},
+                                    new Node { Name="Node2", Lambda=1E-06M, PTI=8760, Beta=10.0, ProofTestEffectiveness=1.0M, LifeTime=87600, TotalFailRate=1E-05M, IsA=true},
+                               }
+            };
+    }
+
+        [XmlIgnore]
         public override List<CutSet> CutSets
         {
             get

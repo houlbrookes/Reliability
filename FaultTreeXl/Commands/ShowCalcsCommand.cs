@@ -169,9 +169,9 @@ namespace FaultTreeXl
                         // We have an incomplete Proof-test node
                         Cell(row, 7).AssignValue(node.ProofTestEffectiveness).SetPercentFormat();
                         Cell(row, 8).AssignValue(node.Lambda * node.ProofTestEffectiveness).SetScientificFormat()
-                            .NameRange($"{node.FormulaName}P_lambda");
+                            .NameRange($"{node.FormulaName}_P_lambda");
                         Cell(row, 9).AssignValue(node.Lambda * (1 - node.ProofTestEffectiveness)).SetScientificFormat()
-                            .NameRange($"{node.FormulaName}L_lambda");
+                            .NameRange($"{node.FormulaName}_L_lambda");
                         Cell(row, 10).AssignValue(node.LifeTime).SetThousandsFormat();
                     }
                 }

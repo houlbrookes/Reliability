@@ -1,8 +1,11 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Xml.Serialization;
+using System.Linq;
 
 namespace FaultTreeXl
 {
-    public class StandardFailure: NotifyPropertyChangedItem
+    public class StandardFailure : NotifyPropertyChangedItem
     {
         public StandardFailure CopyFrom(StandardFailure item2Copy)
         {
@@ -11,6 +14,8 @@ namespace FaultTreeXl
             TotalRate = item2Copy.TotalRate;
             Type = item2Copy.Type;
             IsA = item2Copy.IsA;
+            Source = item2Copy.Source;
+            FailureModes = item2Copy.FailureModes;
             return this;
         }
 
@@ -62,7 +67,97 @@ namespace FaultTreeXl
             set => Changed(ref _isA, value, nameof(IsA));
         }
 
-        public double SFF { get => 1D-(double)(Rate / TotalRate); }
+        private string _source = "Not Referenced";
+        [XmlAttribute]
+        public string Source
+        {
+            get => _source;
+            set => Changed(ref _source, value, nameof(Source));
+        }
+
+        public class FailureMode : NotifyPropertyChangedItem
+        {
+            [XmlIgnore]
+            public Array ModeValues { get => Enum.GetValues(typeof(EnumMode)); }
+
+            private string _name;
+            [XmlAttribute]
+            public string Name
+            {
+                get => _name;
+                set => Changed(ref _name, value, nameof(Name));
+            }
+
+            private double _proportion;
+            [XmlAttribute]
+            public double Proportion
+            {
+                get => _proportion;
+                set
+                {
+                    Changed(ref _proportion, value, nameof(Proportion));
+                }
+            }
+
+            public enum EnumMode { DU, DD, S, NA }
+            private EnumMode mode = EnumMode.DU;
+            [XmlAttribute]
+            public EnumMode Mode
+            {
+                get => mode;
+                set => Changed(ref mode, value, nameof(Mode));
+            }
+
+        }
+
+        private ObservableCollection<FailureMode> _failureModes = new ObservableCollection<FailureMode>();
+        [XmlArray]
+        public ObservableCollection<FailureMode> FailureModes
+        {
+            get => _failureModes;
+            set
+            {
+                if (_failureModes != null)
+                { // Remove events
+                    _failureModes.CollectionChanged -= _failureModes_CollectionChanged;
+                    foreach (var mode in _failureModes) mode.PropertyChanged -= Fm_PropertyChanged;
+                }
+                Changed(ref _failureModes, value, nameof(FailureModes));
+                if (_failureModes != null)
+                {// Add events
+                    foreach (var mode in _failureModes) mode.PropertyChanged += Fm_PropertyChanged;
+                    _failureModes.CollectionChanged += _failureModes_CollectionChanged;
+                }
+            }
+        }
+
+        private void _failureModes_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+                foreach (var item in e.NewItems)
+                    if (item is FailureMode fm)
+                    {
+                        fm.PropertyChanged += Fm_PropertyChanged;
+                        Notify(nameof(SumOfModes));
+                    }
+            if (e.Action==System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var item in e.OldItems)
+                    if (item is FailureMode fm)
+                    {
+                        fm.PropertyChanged -= Fm_PropertyChanged;
+                        Notify(nameof(SumOfModes));
+                    }
+            }
+        }
+
+        private void Fm_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            Notify(nameof(SumOfModes));
+        }
+
+        public double SumOfModes { get => FailureModes.Sum(mode => mode.Proportion); }
+        public double SFF { get => 1D - (double)(Rate / TotalRate); }
         public decimal SafeRate { get => TotalRate - Rate; }
     }
 }

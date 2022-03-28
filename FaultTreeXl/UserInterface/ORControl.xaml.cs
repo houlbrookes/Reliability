@@ -129,7 +129,8 @@ namespace FaultTreeXl
                 e.Effects = DragDropEffects.Move;
                 if (theItem != null && (theItem as OR) != (DataContext as OR))
                 {
-                    theItem.Parent.Nodes.Remove(theItem);
+                    if (theItem.Parent != null)
+                        theItem.Parent.Nodes.Remove(theItem);
                     (DataContext as OR).Nodes.Add(theItem);
                 }
             }

@@ -107,7 +107,8 @@ namespace FaultTreeXl
             }
             if (theItem != null && (theItem as AND) != (DataContext as AND))
             {
-                theItem.Parent.Nodes.Remove(theItem);
+                if (theItem.Parent != null)
+                    theItem.Parent.Nodes.Remove(theItem);
                 (DataContext as AND).Nodes.Add(theItem);
             }
             ANDSymbol.Fill = _previousFill;

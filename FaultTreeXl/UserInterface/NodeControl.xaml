@@ -40,7 +40,7 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="ShowLifeInfto"  TargetType="TextBlock">
+        <Style x:Key="ShowLifeInfo"  TargetType="TextBlock">
             <Setter Property="Visibility" Value="Hidden"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding ShowLifeInfo}" Value="True">
@@ -204,14 +204,17 @@
                        Style="{StaticResource HideProofTestInfo}"/>-->
 
             <!-- Architectural Constraints Info -->
-            <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Center" Style="{StaticResource ShowArchiture}">
+            <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Left" Style="{StaticResource ShowArchiture}">
                 <Run Text="{Binding Path=Description, Mode=OneWay}" FontWeight="Bold" TextDecorations="Underline"/>
                 <LineBreak />
                 <Run FontFamily="Symbol" Text="l"/>
-                <Run BaselineAlignment="Subscript" FontSize="8" Text="Total"/><Run Text=":"/>
+                <Run BaselineAlignment="Subscript" FontSize="8" Text="tot"/>
+                <Run Text=""/>
                 <Run Text="{Binding Path=TotalFailRate,StringFormat=' {0:E2}/hr', Mode=OneWay}"/>
                 <LineBreak />
-                <Run FontFamily="Symbol" Text="l"/><Run BaselineAlignment="Subscript" FontSize="8" Text="DU"/><Run Text=":"/>
+                <Run FontFamily="Symbol" Text="l"/>
+                <Run BaselineAlignment="Subscript" FontSize="8" Text="du"/>
+                <Run Text=""/>
                 <Run Text="{Binding Path=BetaFreeLambda,StringFormat=' {0:E2}/hr', Mode=OneWay}" />                
                 <LineBreak/>
                 <Run Text="SFF:"/><Run Text="{Binding Path=SFF,StringFormat=' {0:P1}', Mode=OneWay}"/>
@@ -220,7 +223,7 @@
             <TextBlock Margin="0,65,0,0" Text="{Binding FailureCount, StringFormat=' {0:###,##0}'}" Style="{StaticResource ShowSimulation}"/>
 
             <!-- Simulation Info-->
-            <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Center" Style="{StaticResource ShowSimulation}">
+            <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Left" Style="{StaticResource ShowSimulation}">
                 <Run Text="{Binding Path=Description, Mode=OneWay}" FontWeight="Bold" TextDecorations="Underline"/>
                 <LineBreak />
                 <Run >PFD:</Run><Run Text="{Binding Path=SimulatedPFD,StringFormat=' {0:E2}', Mode=OneWay}"/>

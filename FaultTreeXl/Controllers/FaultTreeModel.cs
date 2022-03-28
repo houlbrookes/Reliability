@@ -209,13 +209,103 @@ namespace FaultTreeXl
             }
         }
 
+        class TaggedNode
+        {
+            public int Depth { get; set; }
+            public int Width { get; set; }
+            public GraphicItem Node { get; set; }
+            public double ShiftX { get; set; }
+
+
+        }
+        class DepthWidth : IComparable<DepthWidth>
+        {
+            public int Depth { get; set; }
+            public int Width { get; set; }
+            public int CompareTo(DepthWidth other)
+            {
+                return Width.CompareTo(other.Width);
+            }
+        }
+
+        private (List<TaggedNode>, int) Map(GraphicItem node, List<TaggedNode> previous, int depth, int width)
+        {
+            previous.Add(new TaggedNode { Depth = depth, Width = width, Node = node });
+            foreach (var n in node.Nodes)
+            {
+                (previous, width) = Map(n, previous, depth + 1, width);
+                width += 1;
+            }
+            return (previous, width);
+        }
+        private DepthWidth WidestLevel(List<TaggedNode> nodes)
+        {
+            var res = from n in nodes
+                      group n by n.Depth into depthGroup
+                      let maxWidth = depthGroup.Count()
+                      select new DepthWidth{ Depth=depthGroup.Key, Width=maxWidth };
+            var maxItem = res.Max();
+            return maxItem;
+        }
+
+        private void ShiftX(GraphicItem node, double xShift)
+        {
+            node.X -= xShift;
+            foreach (var n in node.Nodes) 
+                ShiftX(n, xShift);
+        }
+        private void ShiftXParent(GraphicItem node, double xShift)
+        {
+            if (node.Parent != null)
+            {
+                var parent = node.Parent;
+                if (parent.Parent == null)
+                { // Top Node
+                    parent.X -= xShift;
+                }
+                else
+                { // Middle Node
+                    var index = parent.Nodes.IndexOf(node);
+                    if (index == 0)
+                    { // First Node of Parent.Parent
+                        parent.X -= xShift;
+                        ShiftXParent(parent, xShift);
+                        // If any of the parent's siblings are singletons, move them too
+                        foreach(var singleton in parent.Parent.Nodes.Where(n => !n.Nodes.Any()))
+                        {
+                            singleton.X -= xShift;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ResetTree(List<TaggedNode> taggedNodes, DepthWidth maxWidth)
+        {
+            // Position the max width row from x=0 to n*width + margin
+            var x = 0D;
+            foreach(var node in taggedNodes.Where(n => n.Depth == maxWidth.Depth))
+            {
+                node.ShiftX = node.Node.X - x;
+                ShiftX(node.Node, node.ShiftX);
+                ShiftXParent(node.Node, node.ShiftX);
+                x += GraphicItem.GRAPHIC_WIDTH;
+            }
+        }
+
         public void ReDrawRootNode()
         {
             FaultTree.ToList().ForEach(n => FaultTree.Remove(n));
             DrawGraphics(RootNode);
             RootNode.AssignXY(0, 0);
-            Width = (FaultTree.Max(n => n.X) + GraphicItem.GRAPHIC_WIDTH + 50);
-            Height = (FaultTree.Max(n => n.Y) + GraphicItem.GRAPHIC_HEIGHT) + 80;
+
+            var map = Map(RootNode, new List<TaggedNode>(), 1, 1);
+            //var deepestLevel = map.Max(n => n.Depth);
+            //var widestLevel = WidestLevel(map);
+            //ResetTree(map, widestLevel);
+
+            Width = FaultTree.Max(n => n.X) + GraphicItem.GRAPHIC_WIDTH; // +50
+            Height = FaultTree.Max(n => n.Y) + GraphicItem.GRAPHIC_HEIGHT; // +80
         }
 
 

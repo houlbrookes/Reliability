@@ -93,5 +93,50 @@ namespace FaultTreeXl
                 }
             }
         }
+
+        private void OR_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var element = (UIElement)sender;
+            GraphicItem data = null;
+            var ftm = Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel;
+            switch (((TextBlock)element).Text)
+            {
+                case "AND" :
+                    data = new AND()
+                    {
+                        Name = $"AND {ftm.NextNodeName("AND") + 1}",
+                        Description = "Please Update",
+                    };
+                    break;
+                case "OR":
+                    data = new OR()
+                    {
+                        Name = $"OR {ftm.NextNodeName("OR") + 1}",
+                        Description = "Please Update",
+                    };
+                    break;
+                case "Node":
+                    data = new Node()
+                    {
+                        Name = $"Node {ftm.NextNodeName("Node") + 1}",
+                        Description="Please Update",
+                        Lambda = 1E-6M,
+                        PTI = 8760M,
+                    };
+                    break;
+                case "CCF":
+                    data = new Node()
+                    {
+                        Name = $"CCF {ftm.NextNodeName("CCF") + 1}",
+                        Description = "Please Update",
+                        Lambda = 1E-6M,
+                        PTI = 8760M,
+                    };
+                    break;
+            }
+
+            if (sender != null && data != null && e.LeftButton == MouseButtonState.Pressed)
+                DragDrop.DoDragDrop(element, data, DragDropEffects.Copy | DragDropEffects.Move); ;
+        }
     }
 }

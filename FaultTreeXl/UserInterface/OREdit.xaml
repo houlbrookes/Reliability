@@ -36,6 +36,15 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="NodesOnlyCheckBox" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="IsEnabled" Value="False" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=NodeType}" Value="Node">
+                    <Setter Property="IsEnabled" Value="True" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
     </Window.Resources>
     <Grid Margin="5">
         <Grid.ColumnDefinitions>
@@ -100,7 +109,7 @@
         <TextBlock Grid.Row="8" Grid.Column="0" Text="Total λ"/>
         <TextBox  Grid.Row="8" Grid.Column="1" Text="{Binding TotalFailRate, StringFormat='{}{0:E2}'}" Style="{StaticResource NodesOnly}"/>
         <TextBlock Grid.Row="9" Grid.Column="0" Text="Type A or B"/>
-        <CheckBox  Grid.Row="9" Grid.Column="1" IsChecked="{Binding IsA}">Is Type A</CheckBox>
+        <CheckBox  Grid.Row="9" Grid.Column="1" IsChecked="{Binding IsA}" Style="{StaticResource NodesOnlyCheckBox}">Is Type A</CheckBox>
         <Button Grid.Row="10" Grid.Column="1" Content="Close" Width="150" Height="20" HorizontalAlignment="Right" Margin="0,0,0,0" IsDefault="True" IsCancel="true"/>
     </Grid>
 </Window>
