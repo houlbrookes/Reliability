@@ -98,8 +98,8 @@ namespace FaultTreeXl
                         Shape arc4 = page.DrawGraphicArc(graphic, 75, 110, 50, 55, 70, 75);
                         Shape arc5 = page.DrawGraphicArc(graphic, 25, 110, 50, 55, 23, 97);
                         graphic.BodyShape = (new List<Shape> { arc3, arc4, arc5 }).GroupShapes();
-                        graphic.BodyShape.AddConnectionPoint(width: 0.5, height: 0.2222, fromBelow: true);
-                        graphic.BodyShape.AddConnectionPoint(width: 0.5, height: 1.0, fromBelow: false);
+                        graphic.BodyShape.AddConnectionPoint(width: 0.5, height: 0.18, fromBelow: true);
+                        graphic.BodyShape.AddConnectionPoint(width: 0.507, height: 1.0, fromBelow: false);
                     }
                     // draw an AND sign for the ANDS
                     else if (graphic is AND theAND)
@@ -162,6 +162,102 @@ namespace FaultTreeXl
                         graphic.Parent.BodyShape.ConnectTo(graphic.Rectangle, secondConnector: 1);
                     }
 
+                }
+
+                // Autosize the drawing
+                page.AutoSizeDrawing();
+
+            }
+
+        }
+
+        private string GetFileName()
+        {
+            string desktopFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            OpenFileDialog fileDialog = new OpenFileDialog()
+            {
+                InitialDirectory = desktopFolder,
+                DefaultExt = ".xml",
+                Filter = "XML documents (.xml)|*.xml",
+                CheckFileExists = true,
+
+            };
+            if (fileDialog.ShowDialog() == true)
+            {
+                return fileDialog.FileName;
+            }
+            return null;
+        }
+
+    }
+
+
+    public class DrawHFTAsVisioCommand : ICommand
+    {
+        public event EventHandler CanExecuteChanged
+        {
+            add { }
+            remove { }
+        }
+
+        public bool CanExecute(object parameter)
+        {
+            return true;
+        }
+
+        public void Execute(object parameter)
+        {
+
+            if ((parameter is List<SFFDisplay> SFFList))
+            {
+                const short visSectionObject = (short)VisSectionIndices.visSectionObject;
+                const short visSectionCharacter = (short)VisSectionIndices.visSectionCharacter;
+                //const short visSectionParagraph = (short)VisSectionIndices.visSectionParagraph;
+                const short visCharacterFont = (short)VisCellIndices.visCharacterFont;
+                const short visRowPage = (short)VisRowIndices.visRowPage;
+                const short visRowPrintProperties = (short)VisRowIndices.visRowPrintProperties;
+                const short visPageWidth = (short)VisCellIndices.visPageWidth;
+                const short visPageHeight = (short)VisCellIndices.visPageHeight;
+                const short visPrintPropertiesPageOrientation = (short)VisCellIndices.visPrintPropertiesPageOrientation;
+                const short visFitPage = (short)VisWindowFit.visFitPage;
+                //const short visHorzAlign = (short)VisCellIndices.visHorzAlign;
+                const short visRowFill = (short)VisRowIndices.visRowFill;
+                const short visFillPattern = (short)VisCellIndices.visFillPattern;
+                const short visRowGradientProperties = (short)VisRowIndices.visRowGradientProperties;
+                const short visFillGradientEnabled = (short)VisCellIndices.visFillGradientEnabled;
+                const short visRowLine = (short)VisRowIndices.visRowLine;
+                //const short visRowGradientProperties = (short)VisRowIndices.visRowGradientProperties;
+                const short visLinePattern = (short)VisCellIndices.visLinePattern;
+                const short visLineGradientEnabled = (short)VisCellIndices.visLineGradientEnabled;
+
+                // Create a new visio application with a document and a single page
+                Application theApp = new Application() { Visible = true, };
+                Document doc = theApp.Documents.Add("");
+                Page page = theApp.ActivePage;
+
+                // Format as A4 Landscape
+                theApp.ActiveWindow.ViewFit = visFitPage;
+                theApp.ActiveWindow.Page.PageSheet.CellsSRC[visSectionObject, visRowPage, visPageWidth].FormulaU = "297 mm";
+                theApp.ActiveWindow.Page.PageSheet.CellsSRC[visSectionObject, visRowPage, visPageHeight].FormulaU = "210 mm";
+                theApp.ActiveWindow.Page.PageSheet.CellsSRC[visSectionObject, visRowPrintProperties, visPrintPropertiesPageOrientation].FormulaForceU = "2";
+
+                int index = 0;
+                SFFDisplay previous = null;
+
+                foreach (SFFDisplay graphic in SFFList)
+                {
+                    // Every item has a rectangle with information in it
+                    graphic.Node.Rectangle = page.DrawRect(graphic, 10, 0, 80, 50);
+                    graphic.Node.Rectangle.AddConnectionPoint(width: 0.0, height: 0.5, fromBelow: false);
+                    graphic.Node.Rectangle.AddConnectionPoint(width: 1.0, height: 0.5, fromBelow: false);
+                    graphic.Node.Rectangle.Text = $"{graphic.Node.Name}";
+                    graphic.Node.Rectangle.Characters.CharProps[(short)VisCellIndices.visCharacterSize] = 8;
+                    if (index > 0)
+                    {
+                        graphic.Node.Rectangle.ConnectTo(previous.Node.Rectangle, 1, 0);
+                    }
+                    previous = graphic;
+                    index += 1;
                 }
 
                 // Autosize the drawing

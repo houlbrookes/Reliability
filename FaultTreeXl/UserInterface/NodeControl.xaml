@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:FaultTreeXl"
+             xmlns:user="clr-namespace:FaultTreeXl.UserInterface"
              mc:Ignorable="d" d:DataContext="{StaticResource GlobalNode}" 
              d:DesignHeight="130" d:DesignWidth="100">
     <UserControl.Resources>
@@ -34,9 +35,15 @@
         <Style x:Key="ShowArchiture" TargetType="TextBlock">
             <Setter Property="Visibility" Value="Hidden"/>
             <Style.Triggers>
-                <DataTrigger Binding="{Binding Path=DataContext.ShowArchConstraints, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="True" >
-                    <Setter Property="Visibility" Value="Visible" />
-                </DataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Path=DataContext.ShowArchConstraints, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MainWindow}}}" Value="True"/>
+                        <Condition Binding="{Binding IsCCF}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+                    <MultiDataTrigger.Setters>
+                        <Setter Property="Visibility" Value="Visible"/>
+                    </MultiDataTrigger.Setters>
+                </MultiDataTrigger>
             </Style.Triggers>
         </Style>
 
@@ -52,17 +59,35 @@
         <Style x:Key="ShowTypeB" TargetType="TextBlock">
             <Setter Property="Visibility" Value="Hidden"/>
             <Style.Triggers>
-                <DataTrigger Binding="{Binding IsA}" Value="False">
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsA}" Value="False"/>
+                        <Condition Binding="{Binding IsCCF}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+                    <MultiDataTrigger.Setters>
+                        <Setter Property="Visibility" Value="Visible"/>
+                    </MultiDataTrigger.Setters>
+                </MultiDataTrigger>
+                <!--<DataTrigger Binding="{Binding IsA}" Value="False">
                     <Setter Property="Visibility" Value="Visible"/>
-                </DataTrigger>
+                </DataTrigger>-->
             </Style.Triggers>
         </Style>
         <Style x:Key="ShowTypeA" TargetType="TextBlock">
             <Setter Property="Visibility" Value="Hidden"/>
             <Style.Triggers>
-                <DataTrigger Binding="{Binding IsA}" Value="True">
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsA}" Value="True"/>
+                        <Condition Binding="{Binding IsCCF}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+                    <MultiDataTrigger.Setters>
+                        <Setter Property="Visibility" Value="Visible"/>
+                    </MultiDataTrigger.Setters>
+                </MultiDataTrigger>
+                <!--<DataTrigger Binding="{Binding IsA}" Value="True">
                     <Setter Property="Visibility" Value="Visible"/>
-                </DataTrigger>
+                </DataTrigger>-->
             </Style.Triggers>
         </Style>
 
@@ -74,7 +99,7 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-        
+
         <!--<Style x:Key="HideProofTestInfo"  TargetType="TextBlock">
             <Setter Property="Visibility" Value="Hidden"/>
             <Style.Triggers>
@@ -102,7 +127,7 @@
     </UserControl.Resources>
 
     <Grid Name="theGrid" Tag="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
-        <Canvas Name="theCanvas" MouseMove="Canvas_MouseMove" AllowDrop="True"
+        <Canvas Name="theCanvas" MouseMove="Canvas_MouseMove" AllowDrop="True" Width="100" Height="130"
                 DragEnter="theCanvas_DragEnter" 
                 DragOver="theCanvas_DragOver"
                 DragLeave="theCanvas_DragLeave"
@@ -112,13 +137,15 @@
             </Canvas.InputBindings>
             <Canvas.ContextMenu >
                 <ContextMenu>
-                    <MenuItem Header="Edit" Command="{StaticResource OREditCommand}" CommandParameter="{Binding}" />
-                    <MenuItem Header="Delete" Command="{StaticResource ORDeleteCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Edit" Command="{StaticResource OREditCommand}" CommandParameter="{Binding}" Icon="{StaticResource EditorIcon}"/>
+                    <MenuItem Header="Delete" Command="{StaticResource ORDeleteCommand}" CommandParameter="{Binding}" Icon="{StaticResource DeleteTag}" >
+                    </MenuItem>
+
                     <MenuItem Header="Move Right" Command="{StaticResource MoveRightCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Move Up" Command="{StaticResource MoveUpCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Move Down" Command="{StaticResource MoveDownCommand}" CommandParameter="{Binding}"/>
                     <!--<MenuItem Header="Add Standard Failiure Rate" Command="{StaticResource GetFailRateCommand}" CommandParameter="{Binding}"/>-->
-                    <MenuItem Header="Calc CCF" Command="{StaticResource CCFCommand}" CommandParameter="{Binding}">
+                    <MenuItem Header="Calc CCF" Command="{StaticResource CCFCommand}" CommandParameter="{Binding}" Icon="{StaticResource CCFIcon}">
                         <MenuItem.Style>
                             <Style TargetType="MenuItem" >
                                 <Setter Property="IsEnabled" Value="False" />
@@ -142,7 +169,7 @@
                 </Rectangle>
             </Border>
             <Line X1="50" Y1="65" X2="50" Y2="75" Stroke="Black"/>
-            
+
             <!-- Beta -->
             <TextBlock Canvas.Left="5" FontFamily="Symbol" Canvas.Top="125"
                        Text="{Binding Path=Beta, StringFormat='b={0}%'}" Style="{StaticResource ShowBetaInfo}" />
@@ -159,11 +186,10 @@
                         </Style.Triggers>
                     </Style>
                 </Ellipse.Style>
-
             </Ellipse>
             <Rectangle Name="NodeNameRectangle" Height="30" Width="90" Canvas.Left="5" Canvas.Top="85" Fill="{StaticResource NodeNameRectangleGradient}">
             </Rectangle>
-            
+
             <!-- Node Information -->
             <TextBlock Margin="4,3,0,0" Width="92" TextAlignment="Left" 
                        Style="{StaticResource ShowCalculation}">
@@ -175,21 +201,33 @@
                 <LineBreak/>
                 <Run >PTI:</Run><Run Text="{Binding Path=PTI,StringFormat=' {0:###,##0}', Mode=OneWay}"/> hrs
             </TextBlock>
-            
-            <!-- Architectural Constraints --> 
+
+            <!-- Architectural Constraints -->
             <!--<TextBlock Margin="35,135,0,0" Height="15" Width="90" Text="{Binding Path=SFF,StringFormat='SFF: {0:P0}'}" TextAlignment="Left" />-->
-            <TextBlock Margin="70,65,0,0" Height="15" Width="90" Text="{Binding Path=ArchSIL,StringFormat='SIL: {0:N0}'}" TextAlignment="Left" />
+            <TextBlock Margin="70,65,0,0" Height="15" Width="90" Text="{Binding Path=ArchSIL,StringFormat='HFT SIL: {0:N0}'}" TextAlignment="Left">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsCCF}" Value="True">
+                                <Setter Property="Visibility" Value="Hidden"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
             <TextBlock Canvas.Left="5" Canvas.Top="115" Height="15" Width="10" Text="A" 
                        TextAlignment="Left" Style="{StaticResource ShowTypeA}"/>
             <TextBlock Height="15" Width="10" Text="B" TextAlignment="Left" 
                        Canvas.Left="5" Canvas.Top="115"
-                       Style="{StaticResource ShowTypeB}"/>
+                       Style="{StaticResource ShowTypeB}">
+            </TextBlock>
 
             <!-- Node Name -->
             <Border Canvas.Left="5" Canvas.Top="85" Height="30" Width="90">
                 <TextBlock Text="{Binding Path=Name}" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"/>
             </Border>
-            
+
             <!-- Prooftest effectiveness and Lifetime Info-->
             <TextBlock Canvas.Left="80" Canvas.Top="115"  Height="15" Width="100" 
                        Text="{Binding Path=ProofTestEffectiveness, StringFormat='c={0:P0}'}" 
@@ -197,7 +235,7 @@
             <TextBlock Canvas.Left="80" Canvas.Top="130"  Height="15" Width="100" 
                        Text="{Binding Path=LifeTime, StringFormat='L={0:###,##0 hrs}'}" 
                        TextAlignment="Left" Style="{StaticResource ShowProofTestInfo}"/>
-            
+
             <!-- Imperfect Proof Testing Lifetime -->
             <!--<TextBlock Canvas.Left="72" Canvas.Top="110" Height="15" Width="100" 
                        Text="{Binding Path=LifeTime, StringFormat='T: {0:N0} hrs'}" TextAlignment="Left"
@@ -219,7 +257,7 @@
                 <LineBreak/>
                 <Run Text="SFF:"/><Run Text="{Binding Path=SFF,StringFormat=' {0:P1}', Mode=OneWay}"/>
             </TextBlock>
-            
+
             <TextBlock Margin="0,65,0,0" Text="{Binding FailureCount, StringFormat=' {0:###,##0}'}" Style="{StaticResource ShowSimulation}"/>
 
             <!-- Simulation Info-->

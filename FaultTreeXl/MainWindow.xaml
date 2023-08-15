@@ -4,15 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FaultTreeXl" Closing="Window_Closing" Background="LightGray"
+        xmlns:user="clr-namespace:FaultTreeXl.UserInterface"
+        xmlns:sys="clr-namespace:System;assembly=System"
         mc:Ignorable="d" DataContext="{StaticResource GlobalFaultTreeModel}" Loaded="Window_Loaded"
         Title="{Binding Path=Filename, StringFormat='Fault Tree: {0}'}" Height="450" Width="800">
     <Window.Resources>
+
         <local:GraphicItemTemplateSelector x:Key="GraphicItemTemplateSelector" />
-        <local:GenerateCutSetsCommand x:Key="GenerateCutSetsCommand" />
-        <local:SaveCommand x:Key="SaveCommand" />
-        <local:SaveAsCommand x:Key="SaveAsCommand" />
-        <local:LoadCommand x:Key="LoadCommand" />
-        <local:ResetScaleCommand x:Key="ResetScaleCommand" />
         <DataTemplate x:Key="NodeTemplate" DataType="{x:Type local:Node}" >
             <local:NodeControl DataContext="{Binding}"/>
         </DataTemplate>
@@ -34,9 +32,10 @@
         <DockPanel Name="MainDockPanel">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="File">
-                    <MenuItem Header="Load" Command="{StaticResource LoadCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="_Save" InputGestureText="Ctrl+S" Command="{StaticResource SaveCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="SaveAs" Command="{StaticResource SaveAsCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Load" Command="{StaticResource LoadCommand}" CommandParameter="{Binding}" Icon="{StaticResource OpenFileIcon}"/>
+                    <MenuItem Header="_Save" InputGestureText="Ctrl+S" Command="{StaticResource SaveCommand}" CommandParameter="{Binding}" Icon="{StaticResource SaveFileIcon}"/>
+                    <MenuItem Header="SaveAs" Command="{StaticResource SaveAsCommand}" CommandParameter="{Binding}" Icon="{StaticResource SaveFileAsIcon}"/>
+
                 </MenuItem>
                 <MenuItem Header="Edit">
                     <MenuItem Header="Add" Command="{StaticResource DummyCommand}" CommandParameter="{Binding Path=HighlightedNode.Name}"/>
@@ -49,11 +48,11 @@
                               Command="{StaticResource ToggleShowLifeCommand}" 
                               CommandParameter="{Binding}"/>
                     <MenuItem Header="Show Architectural Constraints" 
-                              Command="{StaticResource LaunchSFFWindowCommand}"/>
+                              Command="{StaticResource LaunchSFFWindowCommand}" CommandParameter="{Binding}"/>
                 </MenuItem>
                 <MenuItem Header="Cut Sets" Command="{StaticResource GenerateCutSetsCommand}" CommandParameter="{Binding}"/>
                 <MenuItem Header="Visio" >
-                    <MenuItem Header="Draw in Visio" Command="{StaticResource DrawAsVisioCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Draw in Visio" Command="{StaticResource DrawAsVisioCommand}" CommandParameter="{Binding}" Icon="{StaticResource ChartIcon}"/>
                 </MenuItem>
                 <MenuItem Header="Proof Test Effectiveness">
                     <MenuItem Header="100%" Command="{StaticResource ProofTest100}" CommandParameter="{StaticResource GlobalFaultTreeModel}" />
@@ -66,34 +65,97 @@
                     <MenuItem Header="20 Years" Command="{StaticResource Life20Years}" CommandParameter="{Binding}" />
                 </MenuItem>
                 <MenuItem Header="Calcuations" >
-                    <MenuItem Header="Recalculate" Command="{StaticResource RecalcCommand}" CommandParameter="{Binding}" />
+                    <MenuItem Header="Recalculate" Command="{StaticResource RecalcCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Toggle Force Integration" Command="{StaticResource ToggleForceIntegrationCommand}" CommandParameter="{Binding}" IsChecked="{Binding RootNode.ForceIntegration}" />
                     <MenuItem Header="Show Simple Calculations (XL)" Command="{StaticResource ShowSimpleCalcsCommand}" CommandParameter="{Binding RootNode}" />
                     <MenuItem Header="Run Simulation" Command="{StaticResource RunSimulationCommand}" CommandParameter="{Binding}" />
-                    <MenuItem Header="Show Manual Calculations (Word)" Command="{StaticResource ShowManualCalcsCommand}" CommandParameter="{Binding RootNode}" />
+                    <MenuItem Header="Show Manual Calculations (Word)" Command="{StaticResource ShowManualCalcsCommand}" CommandParameter="{Binding RootNode}" Icon="{StaticResource CalculationMethod}"/>
                 </MenuItem>
                 <MenuItem Header="About" >
                     <MenuItem Header="About" Command="{StaticResource AboutCommand}" />
                 </MenuItem>
             </Menu>
+            <!-- Tool Bar at top right of window-->
             <ToolBar DockPanel.Dock="Top" HorizontalAlignment="Right">
-                <TextBlock Text="OR" MouseDown="OR_MouseDown" Margin="10,0,0,0"/>
-                <TextBlock Text="AND" MouseDown="OR_MouseDown" Margin="10,0,0,0"/>
-                <TextBlock Text="Node" MouseDown="OR_MouseDown" Margin="10,0,0,0"/>
-                <TextBlock Text="CCF" MouseDown="OR_MouseDown" Margin="10,0,0,0"/>
+                <Button Command="{StaticResource LoadCommand}" CommandParameter="{Binding}">
+                    <Rectangle Width="16" Height="16">
+                        <Rectangle.Fill>
+                            <DrawingBrush>
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <DrawingGroup.Children>
+                                            <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16.018L0,16.018 0,0.0180000000000007 16,0.0180000000000007z" />
+                                            <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M16,4.3965L16,16.0175 3,16.0175 3,9.9675C1.308,9.7215 0,8.2765 0,6.5175 0,4.7595 1.308,3.3135 3,3.0685L3,0.0175000000000001 5.711,0.0175000000000001 5.729,0.000499999999999723 5.746,0.0175000000000001 11.621,0.0175000000000001z" />
+                                            <GeometryDrawing Brush="#FFEFEFF0" Geometry="F1M10,6.0176L10,4.7636 5.729,9.0356 5,8.3066 5,14.0176 14,14.0176 14,6.0176z M10,4.2716L10,2.0176 7.746,2.0176z M13.793,5.0176L11,5.0176 11,2.2246z" />
+                                            <GeometryDrawing Brush="#FF424242" Geometry="F1M6.7464,1.0177L7.7464,2.0177 9.9994,2.0177 9.9994,6.0167 14.0004,6.0167 14.0004,14.0177 5.0004,14.0177 5.0004,10.0177 3.9994,10.0177 3.9994,15.0167 15.0004,15.0167 15.0004,4.8107 11.2064,1.0177z M10.9994,2.2247L13.7934,5.0177 10.9994,5.0177z" />
+                                            <GeometryDrawing Brush="#FF00529C" Geometry="F1M8.832,4.5176L5.728,7.6216 5.021,6.9136 6.918,5.0176 3.5,5.0176C2.673,5.0176 2,5.6906 2,6.5176 2,7.3446 2.673,8.0176 3.5,8.0176L3.5,9.0176C2.122,9.0176 1,7.8966 1,6.5176 1,5.1396 2.122,4.0176 3.5,4.0176L6.918,4.0176 5.021,2.1216 5.728,1.4136z" />
+                                        </DrawingGroup.Children>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </Button>
+                <Button Command="{StaticResource SaveCommand}" CommandParameter="{Binding}">
+                    <Rectangle Width="16" Height="16">
+                        <Rectangle.Fill>
+                            <DrawingBrush>
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <DrawingGroup.Children>
+                                            <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z">
+                                                <GeometryDrawing.Pen>
+                                                    <Pen Brush="#00FFFFFF" Thickness="1.0000003576278687" DashCap="Flat" />
+                                                </GeometryDrawing.Pen>
+                                            </GeometryDrawing>
+                                            <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M1,15L1,1 10,1 12.414,1 15,3.586 15,15z" />
+                                            <GeometryDrawing Brush="#FF00529C" Geometry="F1M12,2L11,2 11,7 5,7 5,2 2,2 2,14 14,14 14,4z" />
+                                            <GeometryDrawing Brush="#FF00529C" Geometry="F1M10,5L8,5 8,2 10,2z" />
+                                            <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M10,2L10,5 8,5 8,2 5,2 5,7 11,7 11,2z" />
+                                        </DrawingGroup.Children>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </Button>
+                <Button Command="{StaticResource SaveAsCommand}" CommandParameter="{Binding}" >
+                    <Rectangle Width="16" Height="16">
+                        <Rectangle.Fill>
+                            <DrawingBrush>
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <DrawingGroup.Children>
+                                            <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                            <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M15.9062,7.5439C15.9062,8.2289,15.6392,8.8729,15.1562,9.3559L9.3612,15.1519 5.9722,15.9999 4.6232,15.9999 5.1222,13.9999 5.0002,13.9999 4.0002,13.9999 2.0862,13.9999 0.000199999999999534,11.9139 0.000199999999999534,-9.99999999988788E-05 14.0002,-9.99999999988788E-05 14.0002,5.1089C14.4432,5.2179 14.8482,5.4269 15.1572,5.7349 15.6402,6.2179 15.9062,6.8599 15.9062,7.5439" />
+                                            <GeometryDrawing Brush="#FF00529C" Geometry="F1M5,11L6.271,11 5.739,11.531 5.372,13 5,13z M11,5L3,5 3,2 11,2z M1,1L1,11.5 2.5,13 4,13 4,9 8.271,9 11.535,5.735C11.915,5.357,12.437,5.125,13,5.053L13,1z" />
+                                            <GeometryDrawing Brush="#FF424242" Geometry="F1M7.5449,12.5537L7.2799,13.6107 8.3379,13.3467 13.7419,7.9417C13.8479,7.8357 13.9059,7.6947 13.9059,7.5447 13.9059,7.3947 13.8479,7.2547 13.7419,7.1497 13.5559,6.9617 13.1379,6.9617 12.9489,7.1497z M5.9069,14.9857L6.6429,12.0417 12.2419,6.4417C12.8079,5.8797 13.8879,5.8807 14.4499,6.4427 14.7429,6.7357 14.9059,7.1267 14.9059,7.5437 14.9059,7.9617 14.7439,8.3537 14.4489,8.6487L8.8499,14.2487z" />
+                                        </DrawingGroup.Children>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </Button>
+                <user:ORToolBarItem Margin="0,3,0,0"/>
+                <user:ANDToolBarItem Margin="1,3,0,0"/>
+                <user:NodeToolBarItem Margin="5,3,0,0"/>
+                <user:CCFToolBarItem Margin="5,3,0,0" />
+                <ToggleButton x:Name="TogglePopupButton" Width="30" HorizontalAlignment="Left" Content="{StaticResource NoteIcon}"/>
             </ToolBar>
             <Grid >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="320" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="345*" />
+                    <!--<ColumnDefinition Width="128*"/>-->
                 </Grid.ColumnDefinitions>
-                    <!-- Display for the Standard Failiure Rates -->
+                <!-- Display for the Standard Failiure Rates -->
 
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,5,0">
-                <ListBox ItemsSource="{Binding FailureRates}" VerticalAlignment="Top">
-                            <ListBox.Template>
-                                <ControlTemplate>
-                                    <DockPanel LastChildFill="True">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" >
+                    <ListBox ItemsSource="{Binding FailureRates}" VerticalAlignment="Top">
+                        <ListBox.Template>
+                            <ControlTemplate>
+                                <DockPanel LastChildFill="True">
                                     <Grid DockPanel.Dock="Top" Height="20">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="90"/>
@@ -110,14 +172,14 @@
                                     </Grid>
                                     <ItemsPresenter Grid.Row="1" ></ItemsPresenter>
                                 </DockPanel>
-                                </ControlTemplate>
-                            </ListBox.Template>
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
+                            </ControlTemplate>
+                        </ListBox.Template>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
                                 <local:StandardFailureControl/>
                             </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </ScrollViewer>
                 <GridSplitter Grid.Column="0" Width="5" Background="Gray" />
                 <!-- Fault Tree in a Scroll Viewer -->
@@ -126,7 +188,7 @@
                               VerticalAlignment="Top" 
                               HorizontalContentAlignment="Center" 
                               HorizontalScrollBarVisibility="Visible" 
-                              PreviewMouseWheel="TheScrollViewer_PreviewMouseWheel" Grid.ColumnSpan="2" Grid.RowSpan="2" >
+                              PreviewMouseWheel="TheScrollViewer_PreviewMouseWheel" >
                     <ItemsControl ItemsSource="{Binding Path=FaultTree}" 
                                   ItemTemplateSelector="{StaticResource GraphicItemTemplateSelector}">
                         <ItemsControl.ItemsPanel>
@@ -151,9 +213,9 @@
                     </ItemsControl>
                 </ScrollViewer>
                 <!-- Warnings Box -->
-                <Border Margin="9.974,176.994,0,0" Grid.Column="2" BorderBrush="Black" BorderThickness="1" Width="140" Height="50" 
-                        CornerRadius="5" Background="Yellow" 
-                        VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Row="1">
+                <Border Margin="10.278,177,0,0" Grid.Column="1" BorderBrush="Black" BorderThickness="1" Width="140" Height="50" 
+                        CornerRadius="5" Background="Yellow"
+                        VerticalAlignment="Top" HorizontalAlignment="Left">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="Visibility" Value="Hidden"/>
@@ -164,46 +226,78 @@
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <TextBlock Padding="5" TextWrapping="Wrap">
+                    <TextBlock Padding="5" TextWrapping="Wrap" >
                         <Run>Some components have a different PTI</Run>
                     </TextBlock>
                 </Border>
                 <!-- Summary & Options Box -->
-                <Border Margin="9.974,1.994,0,0" Grid.Column="2" BorderBrush="Black" BorderThickness="1" Width="140" Height="170" 
-                        CornerRadius="5" Background="LightGreen"
-                        VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Row="1">
+                <Border  Grid.Column="1" BorderBrush="Black" BorderThickness="1" Width="140" Height="75" 
+                        CornerRadius="5" Background="LightGoldenrodYellow"
+                        VerticalAlignment="Top" HorizontalAlignment="Left">
                     <StackPanel>
                         <TextBlock Padding="5">
-                            <Run>PFD=</Run>
-                            <Run Text="{Binding RootNode.PFD, StringFormat=' {0:E2}', Mode=OneWay}"/>
-                            <LineBreak />
-                            <Run FontFamily="Symbol">l=</Run>
-                            <Run Text="{Binding RootNode.Lambda, StringFormat=' {0:E2}', Mode=OneWay}"/>
-                            <LineBreak />
-                            <Run Text="{Binding SILLevelPFD, StringFormat='SIL Achieved (PFD): {0}', Mode=OneWay}"/>
-                            <LineBreak />
-                            <Run Text="{Binding SILLevelPFH, StringFormat='SIL Achieved (PFH): {0}', Mode=OneWay}" />
-                            <LineBreak />
-                            <Run Text="{Binding RootNode.ArchSIL, StringFormat='SIL Arch Constraints: {0}', Mode=OneWay}" />
-                            <LineBreak />
+                                <!--<Run>PFD=</Run>
+                                <Run Text="{Binding RootNode.PFD, StringFormat=' {0:E2}', Mode=OneWay}"/>
+                                <LineBreak />
+                                <Run FontFamily="Symbol">l=</Run>
+                                <Run Text="{Binding RootNode.Lambda, StringFormat=' {0:E2}', Mode=OneWay}"/>
+                                <LineBreak />-->
+                                <Run Text="{Binding SILLevelPFD, StringFormat='SIL Achieved (PFD): {0}', Mode=OneWay}"/>
+                                <LineBreak />
+                                <Run Text="{Binding SILLevelPFH, StringFormat='SIL Achieved (PFH): {0}', Mode=OneWay}" />
+                                <LineBreak />
+                                <Run Text="{Binding RootNode.ArchSIL, StringFormat='SIL Arch Constraints: {0}', Mode=OneWay}" />
+                        </TextBlock>
+                        <CheckBox Margin="5,2,0,0" IsChecked="{Binding ShowArchConstraints}">Show Arch Constr</CheckBox>
+                    </StackPanel>
+                </Border>
+                <Border  Margin="0,75,0,0" Grid.Column="1" BorderBrush="Black" BorderThickness="1" Width="140" Height="100" 
+                        CornerRadius="5" Background="LightGreen"
+                        VerticalAlignment="Top" HorizontalAlignment="Left">
+                    <StackPanel>
+                        <TextBlock Padding="5">
                             <Hyperlink Command="{StaticResource RunSimulationCommand}" CommandParameter="{Binding}">Run Simulation</Hyperlink>
                             <Hyperlink Command="{StaticResource CancelSimulationCommand}" CommandParameter="{Binding}">/ Cancel</Hyperlink>
                         </TextBlock>
                         <TextBox Margin="5,0,5,0" Text="{Binding SimulationIterations}" />
                         <CheckBox Margin="5,2,0,0" IsChecked="{Binding ResetEachSimulation}">Reset Each Simulation</CheckBox>
                         <CheckBox Margin="5,2,0,0" IsChecked="{Binding ShowSimulationResults}">Show Results</CheckBox>
-                        <CheckBox Margin="5,2,0,0" IsChecked="{Binding ShowArchConstraints}">Show Arch Constr</CheckBox>
+                    </StackPanel>
+                </Border>
+                <Border VerticalAlignment="Top" HorizontalAlignment="Right" 
+                        Margin="0,0,20,0" Grid.Column="1" CornerRadius="5" 
+                        BorderThickness="1" Background="LightBlue" BorderBrush="Black"
+                        >
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Hidden"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=TogglePopupButton}" Value="True">
+                                    <DataTrigger.Setters>
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger.Setters>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel Margin="3">
+                        <TextBox Text="{Binding Path=Notes}" MinHeight="100" MinWidth="200" MaxWidth="400"
+                                         TextWrapping="Wrap" AcceptsReturn="True" IsUndoEnabled="True"
+                                 Background="LightBlue"/>
                     </StackPanel>
                 </Border>
             </Grid>
 
         </DockPanel>
+        <!-- Status Bar at bottom of window -->
         <StatusBar Grid.Row="1">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
@@ -221,10 +315,19 @@
             </StatusBarItem>
             <Separator Grid.Column="1" />
             <StatusBarItem Grid.Column="2">
-                <TextBlock Margin="5,0,0,0" Text="{Binding Path=SILLevelPFD, StringFormat='SIL Achieved (PFD): {0}'}" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="0,0,5,0">
+                        <Run Text="Version:" />
+                    </TextBlock>
+                    <TextBox Text="{Binding Version}" MinWidth="100"/>
+                </StackPanel>
             </StatusBarItem>
             <Separator Grid.Column="3" />
             <StatusBarItem Grid.Column="4">
+                <TextBlock Margin="5,0,0,0" Text="{Binding Path=SILLevelPFD, StringFormat='SIL Achieved (PFD): {0}'}" />
+            </StatusBarItem>
+            <Separator Grid.Column="5" />
+            <StatusBarItem Grid.Column="6">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Name="UnsavedChanges" Text="Unsaved Changes">
                         <TextBlock.Style>
@@ -240,12 +343,12 @@
                     </TextBlock>
                 </StackPanel>
             </StatusBarItem>
-            <Separator Grid.Column="5" />
-            <StatusBarItem Grid.Column="6">
-                <TextBlock Text="{Binding Path=MissionTime, StringFormat='Mission: {0:#,###,##0} hrs'}"/>
-            </StatusBarItem>
             <Separator Grid.Column="7" />
             <StatusBarItem Grid.Column="8">
+                <TextBlock Text="{Binding Path=MissionTime, StringFormat='Mission: {0:#,###,##0} hrs'}"/>
+            </StatusBarItem>
+            <Separator Grid.Column="9" />
+            <StatusBarItem Grid.Column="10">
                 <Grid>
                     <TextBlock Margin="200,0,0,0" Text="{Binding Scale, StringFormat=' {0:P0}'}"/>
                     <Slider Width="200" LargeChange="0.1" Maximum="1.5" Minimum="0.1" Value="{Binding Scale}" HorizontalAlignment="Left">

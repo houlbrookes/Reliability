@@ -6,11 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
+using FaultTreeXl.Global;
+
 namespace FaultTreeXl
 {
     public partial class OR : GraphicItem
     {
-        public override string NodeType => "OR";
+        public override string NodeType => ORConstants.DEFAULT_OR_NODETYPE;
 
 
         [XmlIgnore]
@@ -75,7 +77,7 @@ namespace FaultTreeXl
                     }
                     else
                     { // Perfect proof test non-identical legs
-                        var l_string = string.Join(".", theAnd.Nodes.Select(n => $"λ_{n.Name}"));
+                        var l_string = string.Join(".", theAnd.Nodes.Select(n => $"λ_{n.FormulaName}"));
                         result = ("Voted, c=1, non-ident", $"PFD_{FormulaName}=({l_string}.(1-β)^{nodeCount}.T^{nodeCount})/{nodeCount + 1}+βλT/2");
                     }
                 }
@@ -87,7 +89,7 @@ namespace FaultTreeXl
                     }
                     else
                     {
-                        var l_string = string.Join(".", theAnd.Nodes.Select(n => $"λ_{n.Name}"));
+                        var l_string = string.Join(".", theAnd.Nodes.Select(n => $"λ_{n.FormulaName}"));
                         result = ("Voted, c<>1, non-ident", $"PFD_{FormulaName}=({l_string}.(1-β)^{nodeCount}.(c^{nodeCount}.T^{nodeCount} + (1-c)^{nodeCount} L^{nodeCount}))/{nodeCount+1} + (λ_CCF.(c.T + (1-c).L))/2");
                     }
                 }

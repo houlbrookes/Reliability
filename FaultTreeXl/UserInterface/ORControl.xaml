@@ -37,7 +37,7 @@
     </UserControl.Resources>
 
     <Grid d:DataContext="{StaticResource theDataContext}">
-        <Canvas AllowDrop="True" 
+        <Canvas Name="theCanvas" AllowDrop="True" Width="105" Height="130"
                 DragEnter="Canvas_DragEnter" 
                 DragOver="Canvas_DragOver" 
                 DragLeave="Canvas_DragLeave" 
@@ -49,22 +49,22 @@
             </Canvas.InputBindings>
             <Canvas.ContextMenu>
                 <ContextMenu >
-                    <MenuItem Header="Edit" Command="{StaticResource OREditCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Delete" Command="{StaticResource ORDeleteCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Add an AND below" Command="{StaticResource ANDAddCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Add an OR below" Command="{StaticResource ORAddCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Add a DU Fault below" Command="{StaticResource NodeAddCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Edit" Command="{StaticResource OREditCommand}" CommandParameter="{Binding}" Icon="{StaticResource EditorIcon}"/>
+                    <MenuItem Header="Delete" Command="{StaticResource ORDeleteCommand}" CommandParameter="{Binding}" Icon="{StaticResource DeleteTag}"/>
+                    <MenuItem Header="Add an AND below" Command="{StaticResource ANDAddCommand}" CommandParameter="{Binding}" Icon="{StaticResource ANDIcon}"/>
+                    <MenuItem Header="Add an OR below" Command="{StaticResource ORAddCommand}" CommandParameter="{Binding}" Icon="{StaticResource ORIcon}"/>
+                    <MenuItem Header="Add a DU Fault below" Command="{StaticResource NodeAddCommand}" CommandParameter="{Binding}"  Icon="{StaticResource NodeIcon}"/>
                     <MenuItem Header="Add a DD Fault below" Command="{StaticResource DiagnosedFaultAddCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Add a 2oo3 below" Command="{StaticResource Voted2oo3AddCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Move Right" Command="{StaticResource MoveRightCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Move Up" Command="{StaticResource MoveUpCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Move Down" Command="{StaticResource MoveDownCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Show Cut Sets" Command="{StaticResource ShowCutSetsCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Show Calcs" Command="{StaticResource ShowCalcsCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Show Simple Calcs" Command="{StaticResource ShowSimpleCalcsCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Show Calcs (Cut Sets XL)" Command="{StaticResource ShowCalcsCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Show Simple Calcs (XL)" Command="{StaticResource ShowSimpleCalcsCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Toggle Collapsed View" Command="{StaticResource ToggleCollapseCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Show Manual Calculations" Command="{StaticResource ShowManualCalcsCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Show Manual λ Calculations" Command="{StaticResource ShowManualLambdaCalcsCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Show Manual PDF Calculations (Word)" Command="{StaticResource ShowManualCalcsCommand}" CommandParameter="{Binding}" Icon="{StaticResource CalculationMethod}"/>
+                    <MenuItem Header="Show Manual λ Calculations (Word)" Command="{StaticResource ShowManualLambdaCalcsCommand}" CommandParameter="{Binding}"/>
                 </ContextMenu>
             </Canvas.ContextMenu>
             <Line X1="50" Y1="-10" X2="50" Y2="0" Stroke="Black"/>
@@ -139,7 +139,7 @@
                 <Run >MDT:</Run><Run Text="{Binding Path=MDT,StringFormat=' {0:###,##0}', Mode=OneWay}"/> hrs
             </TextBlock>
 
-            <TextBlock Margin="65,65,0,0" Height="15" Width="90" Text="{Binding Path=ArchSIL,StringFormat='SIL: {0:N0}'}" TextAlignment="Left"/>
+            <TextBlock Margin="65,65,0,0" Height="15" Width="90" Text="{Binding Path=ArchSIL,StringFormat='HFT SIL: {0:N0}'}" TextAlignment="Left"/>
 
             <Border Canvas.Left="5" Canvas.Top="85" Height="30" Width="90">
                 <TextBlock Text="{Binding Path=Name}" 

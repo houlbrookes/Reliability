@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Win32 = Microsoft.Win32;
 
 namespace FaultTreeXl
 {
@@ -99,44 +101,58 @@ namespace FaultTreeXl
             var element = (UIElement)sender;
             GraphicItem data = null;
             var ftm = Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel;
-            switch (((TextBlock)element).Text)
+            var tag = "";
+            if (element is Control control) tag = control.Tag as string;
+            else if (element is Viewbox viewbox) tag = viewbox.Tag as string;
+            if (tag != null)
             {
-                case "AND" :
-                    data = new AND()
-                    {
-                        Name = $"AND {ftm.NextNodeName("AND") + 1}",
-                        Description = "Please Update",
-                    };
-                    break;
-                case "OR":
-                    data = new OR()
-                    {
-                        Name = $"OR {ftm.NextNodeName("OR") + 1}",
-                        Description = "Please Update",
-                    };
-                    break;
-                case "Node":
-                    data = new Node()
-                    {
-                        Name = $"Node {ftm.NextNodeName("Node") + 1}",
-                        Description="Please Update",
-                        Lambda = 1E-6M,
-                        PTI = 8760M,
-                    };
-                    break;
-                case "CCF":
-                    data = new Node()
-                    {
-                        Name = $"CCF {ftm.NextNodeName("CCF") + 1}",
-                        Description = "Please Update",
-                        Lambda = 1E-6M,
-                        PTI = 8760M,
-                    };
-                    break;
+                switch (tag)
+                {
+                    case "AND":
+                        data = new AND()
+                        {
+                            Name = $"AND {ftm.NextNodeName("AND") + 1}",
+                            Description = "Please Update",
+                        };
+                        break;
+                    case "OR":
+                        data = new OR()
+                        {
+                            Name = $"OR {ftm.NextNodeName("OR") + 1}",
+                            Description = "Please Update",
+                        };
+                        break;
+                    case "Node":
+                        data = new Node()
+                        {
+                            Name = $"Node {ftm.NextNodeName("Node") + 1}",
+                            Description = "Please Update",
+                            Lambda = 1E-6M,
+                            PTI = 8760M,
+                        };
+                        break;
+                    case "CCF":
+                        data = new Node()
+                        {
+                            Name = $"CCF {ftm.NextNodeName("CCF") + 1}",
+                            Description = "Please Update",
+                            Lambda = 1E-6M,
+                            PTI = 8760M,
+                        };
+                        break;
+                }
             }
 
             if (sender != null && data != null && e.LeftButton == MouseButtonState.Pressed)
-                DragDrop.DoDragDrop(element, data, DragDropEffects.Copy | DragDropEffects.Move); ;
+            {
+                var obj = new DataObject(data);
+                //var adLayer = AdornerLayer.GetAdornerLayer(element);
+                //var myAdornment = new DraggableAdorner(element);
+                //adLayer.Add(myAdornment);
+                DragDrop.DoDragDrop(element, obj, DragDropEffects.Copy | DragDropEffects.Move);
+                //adLayer.Remove(myAdornment);
+            }
         }
+
     }
 }

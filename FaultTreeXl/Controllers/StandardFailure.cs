@@ -67,6 +67,14 @@ namespace FaultTreeXl
             set => Changed(ref _isA, value, nameof(IsA));
         }
 
+        private string _prefix = "NodeP";
+        [XmlAttribute]
+        public string Prefix
+        {
+            get => _prefix;
+            set => Changed(ref _prefix, value, nameof(Prefix));
+        }
+
         private string _source = "Not Referenced";
         [XmlAttribute]
         public string Source

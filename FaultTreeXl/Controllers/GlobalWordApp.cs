@@ -93,8 +93,10 @@ namespace FaultTreeXl
         public static void AddSection((string text, string equation) param)
         {
             NewLine();
-            AddText(param.text);
-            NewLine();
+            // Decided to take out the comments as they were not useful and needed
+            // to be removed from the document
+            //AddText(param.text);
+            //NewLine();
             Document.AddEquation(param.equation);
         }
 
@@ -122,8 +124,16 @@ namespace FaultTreeXl
                 var para = doc.Paragraphs.Add();
                 var paraRange = para.Range;
                 paraRange.Text = equation;
-                var math = doc.OMaths;
-                math.Add(paraRange);
+                
+                OMaths math = doc.OMaths;
+                Range mathRange = math.Add(paraRange);
+                //OMath equ = mathRange.OMaths[1];
+                //equ.BuildUp();
+                //if (equation.Contains("="))
+                //{
+                //    int firstEquals = equ.Range.Text.IndexOf("=");
+                //    equ.AlignPoint = firstEquals;
+                //}
                 math.BuildUp();
             }
             catch (Exception ex)

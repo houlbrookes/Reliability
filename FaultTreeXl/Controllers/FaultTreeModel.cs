@@ -17,6 +17,7 @@ namespace FaultTreeXl
     /// </summary>
     public class FaultTreeModel : NotifyPropertyChangedItem
     {
+        // initial value of the stored filename
         public const string NO_FILENAME = "<no filename>";
         [XmlIgnore]
         public Random TheRadomBase { get; set; } = new Random();
@@ -78,33 +79,72 @@ namespace FaultTreeXl
         private string _status = "Started";
         [XmlIgnore] public string Status { get => _status; set => Changed(ref _status, value, updateDirty: false); }
 
+        /// <summary>
+        /// An observable list of GraphicItems (Nodes, ORs and ANDs)
+        /// Used to display the Fault Tree in the main window, each grapicItem has an (X,Y) coordinate of
+        /// where it should be displayed
+        /// </summary>
         [XmlIgnore] public ObservableCollection<GraphicItem> FaultTree { get; set; } = new ObservableCollection<GraphicItem>();
+        /// <summary>
+        /// Width of the displayed Fault Tree, used for resizing the background canvas
+        /// </summary>
         private double width = 3000;
         [XmlIgnore] public double Width { get => width; set => Changed(ref width, value); }
         private double height = 800;
+        /// <summary>
+        /// Height of the dispayed Fault Tree, used for resizing the background canvas
+        /// </summary>
         [XmlIgnore] public double Height { get => height; set => Changed(ref height, value); }
-
+        /// <summary>
+        /// Set true when the display is showing the minimal cutset version of the tree
+        /// Set false when the fault tree is being displayed
+        /// </summary>
         [XmlIgnore] public bool ShowingCutsets { get; set; } = false;
+        /// <summary>
+        /// When switching to display the cutsets, the original tree is saved here
+        /// so that it can be restored later
+        /// </summary>
         [XmlIgnore] public GraphicItem SavedRootNode { get; set; }
-
+        /// <summary>
+        /// Current file being edited
+        /// </summary>
         private string filename = "<no filename>";
         [XmlIgnore]
         public string Filename { get => filename; set => Changed(ref filename, value); }
-
+        /// <summary>
+        /// Generic value for proof test effectiveness (pte)
+        /// After applying this value every node will receive the PTE value
+        /// but they can be amended later on an individual basis
+        /// </summary>
         private decimal _proofTestEffectiveness = 1;
         [XmlIgnore]
         public decimal ProofTestEffectiveness { get => _proofTestEffectiveness; set => Changed(ref _proofTestEffectiveness, value); }
-
+        /// <summary>
+        /// Mission time used when calculating the imperfect proof testing
+        /// </summary>
         private decimal _missionTime = 8760;
         [XmlIgnore]
         public decimal MissionTime { get => _missionTime; set => Changed(ref _missionTime, value); }
-
+        /// <summary>
+        /// An anchor point for the root node in the tree
+        /// Note that we cannot use this for display in a List View because an observable collection 
+        /// is required
+        /// </summary>
         private GraphicItem _rootNode = null;
         public GraphicItem RootNode { get => _rootNode; set => Changed(ref _rootNode, value); }
-
+        /// <summary>
+        /// Converts the Root Node PFD to a SIL Value (0 to 4)
+        /// </summary>
         public int SILLevelPFD { get => RootNode.PFD < 1E-04M ? 4 : RootNode.PFD < 1E-03M ? 3 : RootNode.PFD < 1E-02M ? 2 : RootNode.PFD < 1E-01M ? 1 : 0; }
+        /// <summary>
+        /// Converts the Root Node Dangerous Failure Rate to a SIL Value (0 to 4)
+        /// </summary>
         public int SILLevelPFH { get => RootNode.Lambda < 1E-8M ? 4 : RootNode.Lambda < 1E-7M ? 3 : RootNode.Lambda < 1E-6M ? 2 : RootNode.Lambda < 1E-5M ? 1 : 0; }
-
+        /// <summary>
+        /// Set to the currently highlighted node
+        /// This functionality was largely removed because it inteferred with
+        /// the drag and drop functions that were more important
+        /// </summary>
         private GraphicItem _highlightedNode = null;
         [XmlIgnore]
         public GraphicItem HighlightedNode
@@ -112,7 +152,9 @@ namespace FaultTreeXl
             get => _highlightedNode;
             set => Changed(ref _highlightedNode, value);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
         private bool _showLifeInfo = false;
         [XmlIgnore]
         public bool ShowLifeInfo
@@ -142,8 +184,15 @@ namespace FaultTreeXl
                 return result;
             }
         }
+        /// <summary>
+        /// Observable collection of Failure Rates used for Drag/Drop into nodes
+        /// </summary>
         [XmlIgnore]
         public ObservableCollection<StandardFailure> FailureRates { get; set; } = new ObservableCollection<StandardFailure> { };
+        /// <summary>
+        /// Loads the FailureRates collection from an XML File
+        /// </summary>
+        /// <param name="list"></param>
         public static void LoadList(ObservableCollection<StandardFailure> list)
         {
             try
@@ -167,7 +216,9 @@ namespace FaultTreeXl
                 MessageBox.Show("Something went wrong loading the standard parts");
             }
         }
-
+        /// <summary>
+        /// Save the FailureRates collection to an XML File
+        /// </summary>
         public void SaveStandardFailures()
         {
             string fileName = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "StandardParts.xml");
@@ -177,7 +228,11 @@ namespace FaultTreeXl
                 serializer.Serialize(streamWriter, FailureRates);
             }
         }
-
+        /// <summary>
+        /// Populates/Repopulates FaultTree from the Root Node
+        /// Note, it needs to remove/reattach the event callbacks on each nodes and the list itself
+        /// </summary>
+        /// <param name="graphic"></param>
         private void DrawGraphics(GraphicItem graphic)
         {
             graphic.PropertyChanged -= Graphic_PropertyChanged;
@@ -191,7 +246,11 @@ namespace FaultTreeXl
                     DrawGraphics(n);
                 }
         }
-
+        /// <summary>
+        /// Respond to an event generated by the FaultTree collection
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Graphic_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (sender is GraphicItem graphicItem)
@@ -208,7 +267,10 @@ namespace FaultTreeXl
                 Dirty = true;
             }
         }
-
+        /// <summary>
+        /// Internal class used to build a map of the nodes
+        /// so that it can be placed in the optimal place on the screen
+        /// </summary>
         class TaggedNode
         {
             public int Depth { get; set; }
@@ -436,5 +498,27 @@ namespace FaultTreeXl
                 simulationProcess.CancelAsync();
             }
         }
+
+        /// <summary>
+        /// Place to store the version of the fault tree
+        /// </summary>
+        private string _version = "0.1"; // Start the version at 0.1
+        [XmlAttribute]
+        public string Version
+        {
+            get => _version;
+            set => Changed(ref _version, value, nameof(Version));
+        }
+        private string _notes;
+        /// <summary>
+        /// General Notes about the fault tree
+        /// </summary>
+        public string Notes
+        {
+            get => _notes;
+            set => Changed(ref _notes, value, nameof(Notes));
+        }
+
+
     }
 }

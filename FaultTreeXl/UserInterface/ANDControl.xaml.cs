@@ -20,15 +20,11 @@ namespace FaultTreeXl
     /// </summary>
     public partial class ANDControl : UserControl
     {
+        private Adorner myAdornment = null;
+
         public ANDControl()
         {
             InitializeComponent();
-        }
-
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            //if (DataContext is GraphicItem gi)
-            //    gi.DisplayingControl = this;
         }
 
         private void EditClicked(object sender, RoutedEventArgs e)
@@ -39,17 +35,34 @@ namespace FaultTreeXl
             commandToExecute.Execute(new object[] { node, theWindow });
         }
 
-        private Brush _previousFill = null;
         private void Canvas_DragEnter(object sender, DragEventArgs e)
         {
-            _previousFill = ANDSymbol.Fill;
 
             if (e.Data.GetDataPresent(typeof(Node))
                 || e.Data.GetDataPresent(typeof(OR))
                 || e.Data.GetDataPresent(typeof(AND)))
             {
-                ANDSymbol.Fill = Brushes.Yellow;
+                if (e.Data.GetDataPresent(typeof(AND)))
+                {
+                    var theDraggedItem = (AND)e.Data.GetData(typeof(AND));
+                    if (theDraggedItem != (DataContext as AND))
+                    {
+                        myAdornment = new CanDropAdorner(theCanvas);
+                        AdornerLayer.GetAdornerLayer(theCanvas).Add(myAdornment);
+                    }
+                }
+                else
+                {
+                    myAdornment = new CanDropAdorner(theCanvas);
+                    AdornerLayer.GetAdornerLayer(theCanvas).Add(myAdornment);
+                }
             }
+            else
+            {
+                myAdornment = new CannotDropAdorner(theCanvas);
+                AdornerLayer.GetAdornerLayer(theCanvas).Add(myAdornment);
+            }
+
         }
 
         private void Canvas_DragOver(object sender, DragEventArgs e)
@@ -59,7 +72,10 @@ namespace FaultTreeXl
 
         private void Canvas_DragLeave(object sender, DragEventArgs e)
         {
-            ANDSymbol.Fill = _previousFill;
+            if (myAdornment != null)
+            {
+                AdornerLayer.GetAdornerLayer(theCanvas).Remove(myAdornment);
+            }
         }
 
         private void Canvas_Drop(object sender, DragEventArgs e)
@@ -92,7 +108,6 @@ namespace FaultTreeXl
                         IsA = theStdFail.IsA,
                     };
                     (DataContext as AND).Nodes.Add(theNewNode);
-                    ANDSymbol.Fill = _previousFill;
                     ftm.ReDrawRootNode();
                     // Open up an edit window for this node
                     OREdit editingWindow = new OREdit();
@@ -111,7 +126,6 @@ namespace FaultTreeXl
                     theItem.Parent.Nodes.Remove(theItem);
                 (DataContext as AND).Nodes.Add(theItem);
             }
-            ANDSymbol.Fill = _previousFill;
             (Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel).ReDrawRootNode();
         }
 
@@ -121,9 +135,12 @@ namespace FaultTreeXl
             {
                 if (e.LeftButton == MouseButtonState.Pressed)
                 {
+                    myAdornment = new BeginDraggedAdorner(theCanvas);
+                    AdornerLayer.GetAdornerLayer(theCanvas).Add(myAdornment);
                     DragDrop.DoDragDrop(element, DataContext, DragDropEffects.Copy | DragDropEffects.Move);
                 }
             }
+
         }
     }
 }

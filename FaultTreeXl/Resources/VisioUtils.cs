@@ -39,16 +39,35 @@ namespace FaultTreeXl
             return connector;
         }
 
+        static public double ScaledX(this SFFDisplay thisItem, double offset) => (thisItem.X / 1.3 + offset) / 100;
+        static public double ScaledY(this SFFDisplay thisItem, double offset) => 8 - (thisItem.Y + offset) / 100;
+
         static public double ScaledX(this GraphicItem thisItem, double offset) => (thisItem.X/1.3 + offset) / 100;
         static public double ScaledY(this GraphicItem thisItem, double offset) => 8 - (thisItem.Y + offset) / 100;
+
+        static public Shape DrawRect(this Page page, SFFDisplay theGraphic, double x, double y, double width, double height) =>
+            page.DrawRectangle(theGraphic.ScaledX(x), theGraphic.ScaledY(y),
+                               theGraphic.ScaledX(x + width), theGraphic.ScaledY(y + height));
+
 
         static public Shape DrawRect(this Page page, GraphicItem theGraphic, double x, double y, double width, double height) =>
             page.DrawRectangle(theGraphic.ScaledX(x), theGraphic.ScaledY(y),
                                theGraphic.ScaledX(x + width), theGraphic.ScaledY(y + height));
 
-        static public Shape DrawGraphicEllipse(this Page page, GraphicItem theGraphic, double x, double y, double width, double height) 
+        static public Shape DrawGraphicEllipse(this Page page, SFFDisplay theGraphic, double x, double y, double width, double height)
             => page.DrawOval(theGraphic.ScaledX(x), theGraphic.ScaledY(y), theGraphic.ScaledX(x + width), theGraphic.ScaledY(y + width));
 
+        static public Shape DrawGraphicEllipse(this Page page, GraphicItem theGraphic, double x, double y, double width, double height)
+            => page.DrawOval(theGraphic.ScaledX(x), theGraphic.ScaledY(y), theGraphic.ScaledX(x + width), theGraphic.ScaledY(y + width));
+
+
+        static public Shape DrawGraphicArc(this Page thisPage, SFFDisplay theGraphic, double xb, double yb, double xe, double ye, double xControl, double yControl)
+        =>
+            thisPage.DrawArcByThreePoints(
+                xBegin: theGraphic.ScaledX(xb), yBegin: theGraphic.ScaledY(yb),
+                xEnd: theGraphic.ScaledX(xe), yEnd: theGraphic.ScaledY(ye),
+                xControl: theGraphic.ScaledX(xControl),
+                yControl: theGraphic.ScaledY(yControl));
 
         static public Shape DrawGraphicArc(this Page thisPage, GraphicItem theGraphic, double xb, double yb, double xe, double ye, double xControl, double yControl)
         =>
@@ -59,6 +78,12 @@ namespace FaultTreeXl
                 yControl: theGraphic.ScaledY(yControl));
 
         static public Shape DrawGraphicLine(this Page thisPage, GraphicItem theGraphic, double xb, double yb, double xe, double ye)
+        =>
+            thisPage.DrawLine(
+                xBegin: theGraphic.ScaledX(xb), yBegin: theGraphic.ScaledY(yb),
+                xEnd: theGraphic.ScaledX(xe), yEnd: theGraphic.ScaledY(ye));
+
+        static public Shape DrawGraphicLine(this Page thisPage, SFFDisplay theGraphic, double xb, double yb, double xe, double ye)
         =>
             thisPage.DrawLine(
                 xBegin: theGraphic.ScaledX(xb), yBegin: theGraphic.ScaledY(yb),

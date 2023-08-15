@@ -7,7 +7,7 @@
              mc:Ignorable="d" d:DataContext="{DynamicResource DataContext}"
              d:DesignHeight="25" d:DesignWidth="300">
     <UserControl.Resources>
-        <local:StandardFailure x:Key="DataContext" Name="MSR 127" Type="Safety Relay" Rate="1.00E-7" TotalRate="1.00E-06"/>
+        <local:StandardFailure x:Key="DataContext" Name="MSR 127" Type="Safety Relay" Rate="1.00E-7" TotalRate="1.00E-06" Prefix="MSR"/>
     </UserControl.Resources>
     <Grid>
         <StackPanel Orientation="Horizontal"
@@ -20,9 +20,9 @@
                     >
             <StackPanel.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Name="mnuEdit" Header="Edit" Click="mnuEdit_Click"/>
-                    <MenuItem Name="mnuAdd" Header="Add" Click="mnuAdd_Click"/>
-                    <MenuItem Name="mnuDelete" Header="Delete" Click="mnuDelete_Click"/>
+                    <MenuItem Name="mnuEdit" Header="Edit" Click="mnuEdit_Click" Icon="{StaticResource EditorIcon}"/>
+                    <MenuItem Name="mnuAdd" Header="Add" Click="mnuAdd_Click" Icon="{StaticResource AddTag}"/>
+                    <MenuItem Name="mnuDelete" Header="Delete" Click="mnuDelete_Click" Icon="{StaticResource DeleteTag}"/>
                 </ContextMenu>
             </StackPanel.ContextMenu>
             <Grid>

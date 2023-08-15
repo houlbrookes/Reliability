@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using FaultTreeXl.Global;
+using static System.Net.WebRequestMethods;
 
 namespace FaultTreeXl
 {
@@ -14,18 +16,23 @@ namespace FaultTreeXl
 
     public partial class AND : GraphicItem
     {
-        public override string NodeType => "AND";
+        public override string NodeType => ANDConstants.DEFAULT_AND_NODETYPE;
 
         [XmlIgnore]
-        public AND TestValue {
-            get => new AND() { Name = "AND1", Description = "Test Description", Beta=10.0, 
-                               Nodes= new ObservableCollection<GraphicItem> 
-                               { 
-                                    new Node { Name="Node1", Lambda=1E-06M, PTI=8760, Beta=10.0, ProofTestEffectiveness=1.0M, LifeTime=87600, TotalFailRate=1E-05M, IsA=true},
-                                    new Node { Name="Node2", Lambda=1E-06M, PTI=8760, Beta=10.0, ProofTestEffectiveness=1.0M, LifeTime=87600, TotalFailRate=1E-05M, IsA=true},
-                               }
+        public AND TestValue
+        {
+            get => new AND()
+            {
+                Name = ANDConstants.DEFAULT_AND_NAME,
+                Description = ANDConstants.DEFAULT_AND_DESCRIPTION,
+                Beta = ANDConstants.DEFAULT_AND_BETA,
+                Nodes = new ObservableCollection<GraphicItem>
+                {
+                     new Node { Name = NodeUtils.NextNodeName },
+                     new Node { Name = NodeUtils.NextNodeName },
+                }
             };
-    }
+        }
 
         [XmlIgnore]
         public override List<CutSet> CutSets
@@ -49,10 +56,10 @@ namespace FaultTreeXl
         private List<CutSet> Merge(List<CutSet> A, List<CutSet> B)
         {
             // Cartesian join
-            var result = 
+            var result =
                 (from a in A
-                    from b in B
-                        select a.Concat(b));
+                 from b in B
+                 select a.Concat(b));
             // convert back to CS
             return result.Select(l => l).ToList();
         }
@@ -70,7 +77,20 @@ namespace FaultTreeXl
             set => base.BetaFreeLambda = value;
         }
 
-        public override int ArchSIL => Nodes.Any(n => !n.IsCCF) ? Math.Min(Nodes.Where(n => !n.IsCCF).Sum(n => n.ArchSIL),4):1;
+        public override int ArchSIL
+        {
+            get
+            {
+                int result = 0;
+                if (Nodes.Any(n => !n.IsCCF))
+                {
+                    var nonCCFNodes = Nodes.Where(n => !n.IsCCF).Select(n => n.ArchSIL);
+                    var result1 = nonCCFNodes.Max() + (nonCCFNodes.Count() - 1);
+                    result = Math.Min(result1, 4); // Limit max value to SIL 4
+                }
+                return result;
+            }
+        }
 
         public override (string, string) FormulaLambdaString()
         {
@@ -103,7 +123,7 @@ namespace FaultTreeXl
 
         internal override void UpdateBeta(double v)
         {
-            foreach(var node in Nodes) node.UpdateBeta(v);
+            foreach (var node in Nodes) node.UpdateBeta(v);
         }
 
         public bool hasIdenticalLegs()
@@ -131,7 +151,24 @@ namespace FaultTreeXl
             else
                 return false;
         }
+
+        public override void SFFMatrix(int rowIndex, int colIndex, int childOffset = 1)
+        {
+            SFF_X = colIndex * 100.0;
+            SFF_Y = rowIndex * 70.0;
+            rowIndex += childOffset;
+            var childIndex = Math.Max(Nodes.Count, 1);
+            foreach (var node in Nodes)
+            {
+                node.SFFMatrix(rowIndex, colIndex, childIndex);
+                rowIndex += 1;
+            }
+            SFFSpan = Nodes.Count() > 0 ? Nodes.Max(n => n.SFFSpan) : 1;
+            SFFDepth = Nodes.Count() > 0 ? Nodes.Sum(n => n.SFFDepth) : 1;
+            SFFWidth = SFFSpan * 100.0;
+        }
     }
+
 
     public partial class AND
     {

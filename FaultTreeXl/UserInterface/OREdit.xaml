@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FaultTreeXl" d:DataContext="{StaticResource GlobalOR}"
         mc:Ignorable="d" Closing="Window_Closing"
-        Title="OR" Height="275" Width="400" ResizeMode="NoResize" ShowInTaskbar="False" SizeToContent="Height" WindowStartupLocation="CenterOwner">
+        Title="Editor" Height="275" Width="400" ResizeMode="NoResize" ShowInTaskbar="False" SizeToContent="Height" WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <Style TargetType="{x:Type TextBox}">
             <Setter Property="Margin" Value="0,2,40,2" />
@@ -27,7 +27,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
         <Style x:Key="NodesOnly" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
             <Setter Property="IsEnabled" Value="False" />
             <Style.Triggers>
@@ -86,7 +86,7 @@
             <Button Grid.Column="1" Command="{StaticResource PTI8760Command}" CommandParameter="{Binding}">8,760</Button>
             <Button Grid.Column="2" Command="{StaticResource PTI4380Command}" CommandParameter="{Binding}">4,380</Button>
         </Grid>
-        
+
         <TextBlock Grid.Row="4" Grid.Column="0" Text="Mission Time"/>
         <TextBox  Grid.Row="4" Grid.Column="1" Text="{Binding LifeTime, StringFormat={}{0:N0}, ValidatesOnDataErrors=true, NotifyOnValidationError=true}" 
                   Style="{StaticResource NodesOnly}"
@@ -100,10 +100,20 @@
                   />
         <TextBlock Grid.Row="6" Grid.Column="0" Text="Beta Claimed">
         </TextBlock>
-        <TextBox  Grid.Row="6" Grid.Column="1" Text="{Binding Beta, ValidatesOnDataErrors=true, NotifyOnValidationError=true}" 
+        <Grid Grid.Row="6" Grid.Column="1" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="40"/>
+            </Grid.ColumnDefinitions>
+            <TextBox  Text="{Binding Beta, ValidatesOnDataErrors=true, NotifyOnValidationError=true}" 
                   Style="{StaticResource NodesOnly}"
-                  Width="70" HorizontalAlignment="Left"
-                  />
+                  Width="70" HorizontalAlignment="Left"/>
+            <Button Grid.Column="1" Content="0%" Command="{StaticResource BetaZeroCommand}" CommandParameter="{Binding}"/>
+            <Button Grid.Column="2" Content="10%" Command="{StaticResource Beta10Command}" CommandParameter="{Binding}"/>
+            <Button Grid.Column="3" Content="15%" Command="{StaticResource Beta15Command}" CommandParameter="{Binding}"/>
+        </Grid>
         <TextBlock Grid.Row="7" Grid.Column="0" Text="Make/Model"/>
         <TextBox  Grid.Row="7" Grid.Column="1" Text="{Binding MakeModel}" Style="{StaticResource NodesOnly}"/>
         <TextBlock Grid.Row="8" Grid.Column="0" Text="Total λ"/>

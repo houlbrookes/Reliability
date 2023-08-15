@@ -3,7 +3,7 @@ using System.Windows.Input;
 
 namespace FaultTreeXl
 {
-    class PTI4380Command : ICommand
+    class BetaZeroCommand : ICommand
     {
         public event EventHandler CanExecuteChanged
         {
@@ -20,7 +20,7 @@ namespace FaultTreeXl
         {
             if (parameter is Node node)
             {
-                node.PTI = 4380M;
+                node.Beta = 0D;
             }
         }
     }

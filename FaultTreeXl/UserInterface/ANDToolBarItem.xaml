@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="FaultTreeXl.UserInterface.ANDToolBarItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FaultTreeXl.UserInterface"
+             mc:Ignorable="d" 
+             d:DesignHeight="16" d:DesignWidth="16">
+    <ContentControl MouseDown="MouseDownEvent">
+        <Canvas Height="16" Width="16">
+            <Path Name="ANDSymbol" Margin="0,15,0,0" Stroke="Black">
+                <Path.RenderTransform>
+                    <TransformGroup>
+                        <TranslateTransform X="-15" Y="-105"/>
+                        <ScaleTransform ScaleX=".315" ScaleY=".315"/>
+                    </TransformGroup>
+                </Path.RenderTransform>
+                <Path.Data>
+                    <PathGeometry>
+                        <PathFigure StartPoint="25,85">
+                            <ArcSegment Size="25,25" Point="50,55" SweepDirection="Clockwise"  />
+                            <ArcSegment Size="25,25" Point="75,85" SweepDirection="Clockwise"  />
+                            <LineSegment Point="75,85" />
+                            <LineSegment Point="75,110" />
+                            <LineSegment Point="25,110" />
+                            <LineSegment Point="25,85" />
+                        </PathFigure>
+                    </PathGeometry>
+                </Path.Data>
+                <Path.Fill>
+                    <SolidColorBrush Color="RosyBrown" />
+                </Path.Fill>
+            </Path>
+            <TextBlock Canvas.Left="3.5" Canvas.Top="4" FontSize="7">AND</TextBlock>
+        </Canvas>
+    </ContentControl>
+</UserControl>

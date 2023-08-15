@@ -63,7 +63,9 @@
         <TextBox Name="txtTotalRate" Grid.Row="3" Grid.Column="1" Text="{Binding TotalRate, StringFormat='{}{0:E2}'}"/>
         <TextBox Name="txtSFF" Grid.Row="4" Grid.Column="1" Text="{Binding SFF, StringFormat='{}{0:P2}', Mode=OneWay}" IsReadOnly="True" />
         <CheckBox Name="chkIsTypeA" Margin="0,0,0,0" Grid.Row="5" Grid.Column="1" IsChecked="{Binding IsA}" 
-                  HorizontalAlignment="Left" Style="{StaticResource TextAlignLeft}">?Type A</CheckBox>
+                  HorizontalAlignment="Left" Style="{StaticResource TextAlignLeft}" Height="15">?Type A</CheckBox>
+        <Label Target="{Binding ElementName=txtPrefix}" Margin="70,0,0,0" Grid.Row="5" Grid.Column="1" >Prefix:</Label>
+        <TextBox Name="txtPrefix" Margin="110,0,0,0" Grid.Row="5" Grid.Column="1" Text="{Binding Prefix}" Width="100"/>
         <TextBox Name="txtSource" Grid.Row="6" Grid.Column="1" Text="{Binding Source}"/>
         <TextBlock Grid.Row="8" Grid.RowSpan="1" Margin="240,5,0,0" Grid.Column="1" Text="{Binding SumOfModes, StringFormat='{}{0:P0}'}" Width="40" TextAlignment="Right"/>
         <ListView Name="lbFailModes" Grid.Column="1" Grid.Row="7" ItemsSource="{Binding FailureModes}" MinHeight="50" HorizontalAlignment="Left" Width="300">

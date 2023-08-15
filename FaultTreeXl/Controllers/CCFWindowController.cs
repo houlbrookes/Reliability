@@ -102,7 +102,7 @@ namespace FaultTreeXl
         /// </summary>
         public ICommand UpdateCommand { get; set; } = new GenericCommand<object[]>
         {
-            CanExecuteProxy = x => true,
+            CanExecuteProxy = _x => true,
             ExecuteProxy = Update,
         };
         /// <summary>
@@ -116,15 +116,15 @@ namespace FaultTreeXl
         {
             try
             {
-                if ((parameters[0] is CCFWindowController controller) && (parameters[1] is ListView listView))
+                if ((parameters[0] is CCFWindowController aCCFWindowContext) && (parameters[1] is ListView listView))
                 {
                     // Multiple nodes should have been selected
                     // decide which node to use as the basis for the CCF value
                     // if the nodes selected are ORs, update all subnodes with the beta value
                     // Update the CCF Node
                     decimal choice = 0.0M;
-                    var graphicItems = listView.SelectedItems.OfType<GraphicItem>();
-                    var nodeqty = graphicItems.Count();
+                    var nodes2Update = listView.SelectedItems.OfType<GraphicItem>();
+                    var nodeqty = nodes2Update.Count();
 
                     if (nodeqty < 2)
                     {
@@ -132,17 +132,17 @@ namespace FaultTreeXl
                         return;
                     }
 
-                    var lambdas = graphicItems.Select(n => n.Lambda);
-                    //var nodes = graphicItems.OfType<Node>();
-                    //var ors = graphicItems.OfType<OR>();
+                    var lambdas = nodes2Update.Select(n => n.Lambda);
 
                     // Clear Beta from any selected nodes
-                    foreach (var n in controller.Nodes)
+                    foreach (var n in aCCFWindowContext.Nodes)
                     {
                         n.UpdateBeta(0);
                     }
 
-                    switch (controller.Choice)
+                    // Choice of how to calculate the Beta failure rate based
+                    // on the drop-down selection
+                    switch (aCCFWindowContext.Choice)
                     {
                         case "Largest":
                             choice = lambdas.Max();
@@ -160,12 +160,12 @@ namespace FaultTreeXl
                             MessageBox.Show("Invalid choice detected");
                             return;
                     }
-                    controller.Node2Update.Lambda = choice * (decimal)controller.CCFRate;
+                    aCCFWindowContext.Node2Update.Lambda = choice * (decimal)aCCFWindowContext.CCFRate;
                     // Take beta from each of the selected nodes (if UpdateSource is selected)
-                    if (controller.UpdateSource)
+                    if (aCCFWindowContext.UpdateSource)
                     {
-                        foreach (var item in graphicItems)
-                            item.UpdateBeta(controller.CCFRate * 100);
+                        foreach (var item in nodes2Update)
+                            item.UpdateBeta(aCCFWindowContext.CCFRate * 100);
                     }
                 }
             }

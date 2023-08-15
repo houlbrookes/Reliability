@@ -4,10 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:FaultTreeXl"
-             mc:Ignorable="d" DataContextChanged="UserControl_DataContextChanged"
+             mc:Ignorable="d" 
+             
              Height="110" Width="100">
     <UserControl.Resources>
-        
         <local:AND x:Key="DataModel"/>
 
         <Style x:Key="ShowSimulation" TargetType="TextBlock">
@@ -31,17 +31,24 @@
     </UserControl.Resources>
     <!-- Note that the TestValue property of DataModel has been set on the next object in the hierarchy -->
     <Grid d:DataContext="{StaticResource DataModel}">
-        <Canvas d:DataContext="{Binding TestValue}" AllowDrop="True" DragEnter="Canvas_DragEnter" DragOver="Canvas_DragOver" DragLeave="Canvas_DragLeave" Drop="Canvas_Drop" MouseMove="Canvas_MouseMove">
+        <Canvas Name="theCanvas" 
+                d:DataContext="{Binding TestValue}" 
+                AllowDrop="True" Height="135" Width="120"
+                DragEnter="Canvas_DragEnter" 
+                DragOver="Canvas_DragOver" 
+                DragLeave="Canvas_DragLeave" 
+                Drop="Canvas_Drop" 
+                MouseMove="Canvas_MouseMove">
             <Canvas.InputBindings>
                 <MouseBinding Gesture="LeftDoubleClick" Command="{StaticResource OREditCommand}" CommandParameter="{Binding}" />
             </Canvas.InputBindings>
             <Canvas.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Edit" Command="{StaticResource OREditCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Delete" Command="{StaticResource ORDeleteCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Add an AND below" Command="{StaticResource ANDAddCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Add an OR below" Command="{StaticResource ORAddCommand}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="Add a DU Fault below" Command="{StaticResource NodeAddCommand}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="Edit" Command="{StaticResource OREditCommand}" CommandParameter="{Binding}" Icon="{StaticResource EditorIcon}"/>
+                    <MenuItem Header="Delete" Command="{StaticResource ORDeleteCommand}" CommandParameter="{Binding}" Icon="{StaticResource DeleteTag}"/>
+                    <MenuItem Header="Add an AND below" Command="{StaticResource ANDAddCommand}" CommandParameter="{Binding}" Icon="{StaticResource ANDIcon}"/>
+                    <MenuItem Header="Add an OR below" Command="{StaticResource ORAddCommand}" CommandParameter="{Binding}" Icon="{StaticResource ORIcon}"/>
+                    <MenuItem Header="Add a DU Fault below" Command="{StaticResource NodeAddCommand}" CommandParameter="{Binding}"  Icon="{StaticResource NodeIcon}"/>
                     <MenuItem Header="Add a DD Fault below" Command="{StaticResource DiagnosedFaultAddCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Add a 2oo3 below" Command="{StaticResource Voted2oo3AddCommand}" CommandParameter="{Binding}"/>
                     <MenuItem Header="Move Right" Command="{StaticResource MoveRightCommand}" CommandParameter="{Binding}"/>
@@ -121,7 +128,7 @@
             <Border Canvas.Left="5" Canvas.Top="85" Height="30" Width="90">
                 <TextBlock Text="{Binding Path=Name}" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"/>
             </Border>
-            <TextBlock Margin="72,67,0,0" Height="15" Width="90" Text="{Binding Path=ArchSIL,StringFormat='SIL: {0:N0}'}" TextAlignment="Left" />
+            <TextBlock Margin="72,67,0,0" Height="15" Width="90" Text="{Binding Path=ArchSIL,StringFormat='HFT SIL: {0:N0}'}" TextAlignment="Left" />
 
             <Line X1="50" Y1="125" X2="50" Y2="135" Stroke="Black">
                 <!--<Line.Style>

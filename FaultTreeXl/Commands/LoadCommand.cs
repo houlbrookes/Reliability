@@ -8,6 +8,9 @@ using System.Xml.Serialization;
 
 namespace FaultTreeXl
 {
+    /// <summary>
+    /// This command loads the fault tree from an XML File
+    /// </summary>
     public class LoadCommand : ICommand
     {
         public event EventHandler CanExecuteChanged
@@ -29,6 +32,8 @@ namespace FaultTreeXl
                 FaultTreeModel data = serializer.Deserialize(streamReader) as FaultTreeModel;
                 mc.Filename = fileName;
                 mc.RootNode = data.RootNode;
+                mc.Version = data.Version;
+                mc.Notes = data.Notes;
                 mc.ReDrawRootNode();
                 mc.ShowingCutsets = false;
                 mc.Dirty = false;

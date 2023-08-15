@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="FaultTreeXl.UserInterface.NodeToolBarItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FaultTreeXl.UserInterface"
+             mc:Ignorable="d" 
+             d:DesignHeight="16" d:DesignWidth="16">
+    <ContentControl MouseDown="MouseDownEvent">
+        <Canvas Height="16" Width="16">
+            <Ellipse Canvas.Left="0" Height="16" Width="16" Stroke="Black" Fill="LightBlue"/>
+            <TextBlock Width="16" Height="16" Padding="0,3.5,0,0" TextAlignment="Center" VerticalAlignment="Bottom"  FontSize="7">DU</TextBlock>
+        </Canvas>
+    </ContentControl>
+</UserControl>

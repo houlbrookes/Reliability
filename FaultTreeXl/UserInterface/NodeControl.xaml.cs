@@ -23,11 +23,6 @@ namespace FaultTreeXl
         public NodeControl()
         {
             InitializeComponent();
-
-            _previousFillNodeSymbol = NodeSymbol.Fill;
-            _previousFillNodeName = NodeNameRectangle.Fill;
-            _previousFillNodeDescRectangle = NodeDescRectangle.Background;
-
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
@@ -36,10 +31,8 @@ namespace FaultTreeXl
             {
                 if (e.LeftButton == MouseButtonState.Pressed)
                 {
-                    NodeSymbol.Fill = Brushes.LightGray;
-                    NodeNameRectangle.Fill = Brushes.LightGray;
-                    NodeDescRectangle.Background = Brushes.LightGray;
-
+                    myAdornment = new BeginDraggedAdorner(theCanvas);
+                    AdornerLayer.GetAdornerLayer(theCanvas).Add(myAdornment);
                     DragDrop.DoDragDrop(element, DataContext, DragDropEffects.Copy | DragDropEffects.Move);
                 }
             }
@@ -59,8 +52,8 @@ namespace FaultTreeXl
         }
 
         Brush _previousFillNodeSymbol = null;
-        Brush _previousFillNodeName = null;
-        Brush _previousFillNodeDescRectangle = null;
+
+        Adorner myAdornment;
 
         private void theCanvas_DragEnter(object sender, DragEventArgs e)
         {
@@ -78,13 +71,16 @@ namespace FaultTreeXl
 
             if (thisIsADifferentNode)
             {
-                if (e.Data.GetDataPresent(typeof(Node))
-                 || e.Data.GetDataPresent(typeof(OR))
+                if (e.Data.GetDataPresent(typeof(OR))
                  || e.Data.GetDataPresent(typeof(AND)))
                 {
-                    NodeSymbol.Fill = Brushes.Yellow;
-                    NodeNameRectangle.Fill = Brushes.Yellow;
-                    NodeDescRectangle.Background = Brushes.Yellow;
+                    myAdornment = new CannotDropAdorner(theCanvas);
+                    AdornerLayer.GetAdornerLayer(theCanvas).Add(myAdornment);
+                }
+                else
+                {
+                    myAdornment = new CanDropAdorner(theCanvas);
+                    AdornerLayer.GetAdornerLayer(theCanvas).Add(myAdornment);
                 }
             }
             else
@@ -99,19 +95,19 @@ namespace FaultTreeXl
 
             bool thisIsADifferentNode = true;
 
-            Node theDraggedItem = null;
-
             if (e.Data.GetDataPresent(typeof(Node)))
             {
-                theDraggedItem = (Node)e.Data.GetData(typeof(Node));
+                Node theDraggedItem = (Node)e.Data.GetData(typeof(Node));
                 thisIsADifferentNode = theDraggedItem != (DataContext as Node);
             }
 
             if (thisIsADifferentNode)
             {
-                NodeSymbol.Fill = _previousFillNodeSymbol;
-                NodeNameRectangle.Fill = _previousFillNodeName;
-                NodeDescRectangle.Background = _previousFillNodeDescRectangle;
+                if (myAdornment != null)
+                {
+                    AdornerLayer.GetAdornerLayer(theCanvas).Remove(myAdornment);
+                }
+
             }
         }
 
@@ -145,13 +141,12 @@ namespace FaultTreeXl
                         var thisItem = DataContext as Node;
                         thisItem.BetaFreeLambda = theStdFail.Rate;
                         thisItem.MakeModel =  theStdFail.Type+ "/" + theStdFail.Name;
-                        NodeSymbol.Fill = _previousFillNodeSymbol;
                         ftm.ReDrawRootNode();
                     }
                     return;
                 }
             }
-            NodeSymbol.Fill = _previousFillNodeSymbol;
+
             (Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel).ReDrawRootNode();
         }
     }

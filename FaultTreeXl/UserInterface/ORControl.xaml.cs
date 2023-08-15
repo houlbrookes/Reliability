@@ -40,16 +40,22 @@ namespace FaultTreeXl
             commandToExecute.Execute(new object[] { node, theWindow });
         }
 
-        private Brush _previousFill = null;
+        private Adorner myAdornment = null;
+
         private void Canvas_DragEnter(object sender, DragEventArgs e)
         {
             base.OnDragEnter(e);
-            _previousFill = ORSymbol.Fill;
             if (e.Data.GetDataPresent(typeof(Node)) 
              || e.Data.GetDataPresent(typeof(OR)) 
              || e.Data.GetDataPresent(typeof(AND)))
             {
-                ORSymbol.Fill = Brushes.Yellow;
+                myAdornment = new CanDropAdorner(theCanvas);
+                AdornerLayer.GetAdornerLayer(theCanvas).Add(myAdornment);
+            }
+            else
+            {
+                myAdornment = new CannotDropAdorner(theCanvas);
+                AdornerLayer.GetAdornerLayer(theCanvas).Add(myAdornment);
             }
         }
 
@@ -69,7 +75,10 @@ namespace FaultTreeXl
         private void Canvas_DragLeave(object sender, DragEventArgs e)
         {
             base.OnDragLeave(e);
-            ORSymbol.Fill = _previousFill;
+            if (myAdornment != null)
+            {
+                AdornerLayer.GetAdornerLayer(theCanvas).Remove(myAdornment);
+            }
         }
 
         private void Canvas_Drop(object sender, DragEventArgs e)
@@ -89,29 +98,25 @@ namespace FaultTreeXl
             }
             else if (e.Data.GetDataPresent(typeof(StandardFailure)))
             {
-                var ftm = Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel;
-                if (ftm != null)
+                var theStdFail = (StandardFailure)e.Data.GetData(typeof(StandardFailure));
+                var theNewNode = new Node()
                 {
-                    var theStdFail = (StandardFailure)e.Data.GetData(typeof(StandardFailure));
-                    var theNewNode = new Node()
-                    {
-                        Name = $"Node {ftm.NextNodeName("Node") + 1}",
-                        Description = theStdFail.Name,
-                        Lambda = theStdFail.Rate,
-                        TotalFailRate = theStdFail.TotalRate,
-                        IsA = theStdFail.IsA,
-                    };
-                    (DataContext as OR).Nodes.Add(theNewNode);
-                    ftm.ReDrawRootNode();
-                    ORSymbol.Fill = _previousFill;
-                    // Open up an edit window for this node
-                    OREdit editingWindow = new OREdit();
-                    editingWindow.DataContext = theNewNode;
-                    editingWindow.Owner = Application.Current.MainWindow;
-                    editingWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                    editingWindow.ShowDialog();
-                    theNewNode.UpdateParent();
-                }
+                    Name = Global.NodeUtils.NextNodeName,
+                    Description = theStdFail.Name,
+                    Lambda = theStdFail.Rate,
+                    TotalFailRate = theStdFail.TotalRate,
+                    IsA = theStdFail.IsA,
+                };
+                (DataContext as OR).Nodes.Add(theNewNode);
+                Global.NodeUtils.ReDrawRootNode();
+
+                // Open up an edit window for this node
+                OREdit editingWindow = new OREdit();
+                editingWindow.DataContext = theNewNode;
+                editingWindow.Owner = Application.Current.MainWindow;
+                editingWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                editingWindow.ShowDialog();
+                theNewNode.UpdateParent();
                 return;
             }
             if (e.KeyStates == DragDropKeyStates.ControlKey)
@@ -134,11 +139,8 @@ namespace FaultTreeXl
                     (DataContext as OR).Nodes.Add(theItem);
                 }
             }
-            ORSymbol.Fill = _previousFill;
             (Application.Current.FindResource("GlobalFaultTreeModel") as FaultTreeModel).ReDrawRootNode();
         }
-
-
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
@@ -146,6 +148,8 @@ namespace FaultTreeXl
             {
                 if (e.LeftButton == MouseButtonState.Pressed)
                 {
+                    myAdornment = new BeginDraggedAdorner(theCanvas);
+                    AdornerLayer.GetAdornerLayer(theCanvas).Add(myAdornment);
                     DragDrop.DoDragDrop(element, DataContext, DragDropEffects.Copy | DragDropEffects.Move);
                 }
             }

@@ -89,12 +89,25 @@ namespace FaultTreeXl
             }
         }
 
+        /// <summary>
+        /// Return a sanatized formula name that can appear in 
+        /// formulas for excel/word equations etc.
+        /// </summary>
         public string FormulaName
         {
             get
             {
+                string name2process = _name;
+                // if the name starts with a digit, add an underscore
+                var leadingDigit = new Regex(@"^\d");
+                if (leadingDigit.IsMatch(name2process))
+                    name2process = "_" + _name; // match, so add an underscore to the front
+                else
+                    name2process = _name; // no match, copy the string
+
+                // replace white space characters with and underscore
                 var reg = new Regex(@"\W");
-                return "x" + reg.Replace(_name, "_");
+                return "x" + reg.Replace(name2process, "_");
             }
 
         }
@@ -126,7 +139,7 @@ namespace FaultTreeXl
                 Notify(nameof(ArchSIL));
                 var p = Parent;
                 while (p != null)
-                { 
+                {
                     p?.Notify(nameof(ArchSIL));
                     p = p.Parent;
                 }
@@ -152,7 +165,7 @@ namespace FaultTreeXl
             }
         }
 
-        public double SFF { get => (double)(1M - BetaFreeLambda / TotalFailRate); }
+        public double SFF { get => (double)(TotalFailRate != 0M ? 1M - BetaFreeLambda / TotalFailRate : 0M); }
         public virtual int ArchSIL
         {
             get
@@ -486,6 +499,113 @@ namespace FaultTreeXl
             set => Changed(ref _showLifeInfo, value);
         }
 
+        private double _sFF_X;
+
+        public double SFF_X
+        {
+            get => _sFF_X;
+            set => Changed(ref _sFF_X, value, nameof(SFF_X));
+        }
+
+        private double _sFF_Y;
+
+        public double SFF_Y
+        {
+            get => _sFF_Y;
+            set => Changed(ref _sFF_Y, value, nameof(SFF_Y));
+        }
+
+        private double _sFFWidth;
+
+        public double SFFWidth
+        {
+            get => _sFFWidth;
+            set => Changed(ref _sFFWidth, value, nameof(SFFWidth));
+        }
+
+
+        private int _sFFSpan;
+        public int SFFSpan
+        {
+            get => _sFFSpan;
+            set => Changed(ref _sFFSpan, value, nameof(SFFSpan));
+        }
+
+        private int _sFFDepth;
+        public int SFFDepth
+        {
+            get => _sFFDepth;
+            set => Changed(ref _sFFDepth, value, nameof(SFFDepth));
+        }
+
+        public virtual int Depth
+        {
+            get => 1 + (Nodes.Count > 0 ? Nodes.Max(n => n.Depth) : 0);
+        }
+
+        public virtual List<SFFDisplay> NodesForLevel(int level, int lastRow, int lastCol, int maxLevel)
+        {
+            if (level == 0)
+            {
+                Console.WriteLine("---------------------------------");
+            }
+            Console.WriteLine("NodesForLevel Entered with: {0},({1},{2}, {3})", level, lastRow, lastCol, Name);
+
+            var result = new List<SFFDisplay>();
+
+            if (level > 0)
+            {
+                if (Nodes.Count > 0)
+                {
+                    foreach (var node in Nodes)
+                    {
+                        result.AddRange(node.NodesForLevel(level - 1, lastRow, lastCol, maxLevel));
+                        if (this is AND)
+                        {
+                            lastRow += 1;
+                        }
+                        else
+                        {
+                            lastCol = result.Max(item => item.Col) + 1;
+                        }
+                    }
+                }
+                else
+                {
+                    // Can't go any further, so return this node
+                    result.Add(new SFFDisplay { Node = this, Row = lastRow, Col = lastCol, Level = maxLevel });
+                }
+            }
+            else
+            {
+                // we are at the correct levl
+                result.Add(new SFFDisplay { Node = this, Row = lastRow, Col = lastCol, Level = maxLevel });
+            }
+            Debug.Assert(result.Count != 0);
+            return result;
+        }
+
+        public virtual void SFFMatrix(int rowIndex, int colIndex, int childOffset = 1)
+        {
+            SFF_X = colIndex * 100.0;
+            SFF_Y = rowIndex * 70.0;
+            SFFSpan = Math.Max(Nodes.Count(), 1);
+            rowIndex += childOffset;
+            foreach (var node in Nodes)
+            {
+                node.SFFMatrix(rowIndex, colIndex);
+                colIndex += node.SFFSpan;
+            }
+
+            SFFDepth = 1;
+            if (Nodes.Count() > 0)
+            {
+                SFFDepth += Nodes.Max(n => n.SFFDepth);
+            }
+            SFFSpan = Nodes.Count() > 0 ? Nodes.Sum(n => n.SFFSpan) : 1;
+            SFFDepth = Nodes.Count() > 0 ? Nodes.Max(n => n.SFFDepth) + 1 : 1; ;
+            SFFWidth = SFFSpan * 100.0;
+        }
     }
 
     /// <summary>
