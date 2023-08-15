@@ -9,7 +9,7 @@
         mc:Ignorable="d" DataContext="{StaticResource GlobalFaultTreeModel}" Loaded="Window_Loaded"
         Title="{Binding Path=Filename, StringFormat='Fault Tree: {0}'}" Height="450" Width="800">
     <Window.Resources>
-
+        <!--Version 1.0-->
         <local:GraphicItemTemplateSelector x:Key="GraphicItemTemplateSelector" />
         <DataTemplate x:Key="NodeTemplate" DataType="{x:Type local:Node}" >
             <local:NodeControl DataContext="{Binding}"/>
